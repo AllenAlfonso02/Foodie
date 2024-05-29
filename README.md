@@ -1,2 +1,2 @@
 # Foodie
-Food Ordering Service
+Restaurant Pairing App
