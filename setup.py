@@ -72,3 +72,6 @@ CREATE TABLE if NOT EXISTS  menu_items (
     FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
 );
 """)
+
+cursor.execute("CREATE ROLE IF NOT EXISTS 'Establishment'")
+cursor.execute("CREATE ROLE IF NOT EXISTS 'Restaurant_user'")
