@@ -6,7 +6,7 @@ app = Flask(__name__)
 # Database connection parameters
 host = "localhost"
 user = "root"
-password = "septons"
+password = ""
 database = "Foodie"
 
 db = MySQLdb.connect(host=host, user=user, passwd=password, db=database)
@@ -36,10 +36,10 @@ def signin():
 
             if result:
                 print("Login successful")
+                return render_template('mainpage.html')
             else:
                 print("Invalid username or password")
-
-            return render_template('mainpage.html')
+                return render_template('startingPage.html')
 
 
         except MySQLdb.Error as e:
@@ -47,7 +47,6 @@ def signin():
             return render_template('singin.html')
 
     elif (request.method == 'GET'):
-        print("in here? 6")
         return render_template('signin.html')
 
 

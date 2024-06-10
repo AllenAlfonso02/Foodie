@@ -3,7 +3,7 @@ import MySQLdb
 # Database connection parameters
 host = "localhost"
 user = "root"
-password = "0179849Aa$"
+password = ""
 
 db = MySQLdb.connect(host=host, user=user, passwd=password)
 cursor = db.cursor()
@@ -25,7 +25,6 @@ cursor.execute("""
     ); 
     """)
 print("Table 'login' created successfully.")
-
 
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS restaurants (
@@ -77,3 +76,6 @@ CREATE TABLE if NOT EXISTS  menu_items (
 );
 """)
 print("Table 'menu_items' created successfully.")
+
+cursor.execute("CREATE ROLE IF NOT EXISTS 'Establishment'")
+cursor.execute("CREATE ROLE IF NOT EXISTS 'Restaurant_user'")
