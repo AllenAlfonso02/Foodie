@@ -3,14 +3,12 @@
     <body>
         <h1>FOODIE</h1>
         <h2>Sign Up</h2>
-        <form action = "{{ url_for('') }}">
+        <form action = "{{ url_for('signup') }}" method = "POST">
             Email/Username:
             <input type="text" name="newUserNameOrEmail">
             <br>
             Password:
             <input type="text" name="newUserPassword">
-            <br>
-            <input type="submit" value="submit">
             <br>
             <input type="radio" name="accountType" value="User">
             User
@@ -18,8 +16,10 @@
             <input type="radio" name="accountType" value="Establishment">
             Establishment
             <br>
+            <input type="submit" value="submit">
+            <br>
             <br>
         </form>
-        <a href="/">Back to Sign In</a>
+        <a href="/">Back to Menu</a>
     </body>
 </html>
