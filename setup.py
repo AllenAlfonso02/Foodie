@@ -9,13 +9,13 @@ db = MySQLdb.connect(host=host, user=user, passwd=password)
 cursor = db.cursor()
 
 # Create a new database
-cursor.execute("CREATE DATABASE IF NOT EXISTS Foodie;")
+cursor.execute("CREATE DATABASE IF NOT EXISTS FOODIE;")
 print("Database 'Foodie' created successfully.")
 
 # Select the newly created database
 cursor.execute("USE Foodie;")
 
-# Create a new table
+# Create a new table:
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS login (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -73,5 +73,20 @@ CREATE TABLE if NOT EXISTS  menu_items (
 );
 """)
 
-cursor.execute("CREATE ROLE IF NOT EXISTS 'Establishment'")
-cursor.execute("CREATE ROLE IF NOT EXISTS 'Restaurant_user'")
+cursor.execute("CREATE ROLE IF NOT EXISTS 'customer_user'")
+cursor.execute("CREATE ROLE IF NOT EXISTS 'restaurant_user'")
+cursor.execute("CREATE ROLE IF NOT EXISTS 'admin'")
+
+roles_command = [
+    "GRANT SELECT ON Foodie.restaurants TO 'customer_user';",
+    "GRANT SELECT ON Foodie.menu_items TO 'customer_user';",
+    "GRANT SELECT, INSERT, UPDATE ON Foodie.customer TO 'customer_user';",
+    "GRANT SELECT, INSERT, UPDATE, DELETE ON Foodie.restaurants TO 'restaurant_user';",
+    "GRANT SELECT, INSERT, UPDATE, DELETE ON Foodie.menu_items TO 'restaurant_user';",
+]
+for command in roles_command:
+    cursor.execute(command)
+
+cursor.execute("SET ROLE 'customer_user';")
+cursor.execute("SET ROLE 'restaurant_user';")
+
