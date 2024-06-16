@@ -151,5 +151,23 @@ def addLiked():
             db.close()
             return "Successfully added Restaurant"
 
+@app.route('/userMenuView', methods = ['POST', 'GET'])
+def showMenu():
+    if (request.method == 'GET'):
+        try:
+            db.row_factory = MySQLdb.Row
+
+            currID = ""
+
+            cursor.execute('SELECT * FROM menu_items WHERE restaurant_id = ?', (currID,))
+
+            rows = cursor.fetchall()
+
+        except:
+            return render_template('userMenuView.html')
+
+    else:
+        return render_template('startingPage.html') 
+
 if __name__ == '__main__':
     app.run(debug=True)
