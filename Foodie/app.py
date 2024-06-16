@@ -140,10 +140,10 @@ def edit_restaurant(restaurant_id):
             restaurant = cursor.fetchone()
 
             # Assuming restaurant is a dictionary-like object with keys like 'closing_hours'
-            return render_template('edit_restaurant.html', restaurant=restaurant)
+            return render_template('editrestaurant.html', restaurant=restaurant)
         except MySQLdb.Error as e:
             print(f"An error occurred: {e}")
-            return render_template('edit_restaurant.html', error="Failed to fetch restaurant details.")
+            return render_template('editrestaurant.html', error="Failed to fetch restaurant details.")
     
     elif request.method == 'POST':
         # Retrieve updated form data
@@ -171,11 +171,11 @@ def edit_restaurant(restaurant_id):
                   restaurant_website, restaurant_openhours, restaurant_closehours, restaurant_id))
             db.commit()
             print("Restaurant details updated successfully")
-            return redirect(url_for('edit_restaurant', restaurant_id=restaurant_id))
+            return redirect(url_for('editrestaurant', restaurant_id=restaurant_id))
         except MySQLdb.Error as e:
             db.rollback()
             print(f"An error occurred: {e}")
-            return render_template('edit_restaurant.html', error="Failed to update restaurant details.")
+            return render_template('editrestaurant.html', error="Failed to update restaurant details.")
 
 
 if __name__ == '__main__':
