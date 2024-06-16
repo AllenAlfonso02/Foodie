@@ -1,5 +1,5 @@
 import MySQLdb
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
@@ -81,6 +81,30 @@ def signup():
 @app.route('/mainpage')
 def mainpage():
     return render_template('mainpage.html')
+
+@app.route('/loadNext')
+def loadNext():
+    #select statement
+    global currentID; currentID += 1
+    testjson = {"picture" : "https://www.connarchitects.com/wp-content/uploads/2019/09/CONN_Edison-2.jpg",
+                "name" : "Dummy Restaurant",
+                "description" : "This is a json created to test my restaurant.fdhfkjsdhfjdshfkhdskfhkjfsdhjdfhksfhjkhsfkdhfds",
+                }
+    return jsonify(testjson)
+
+@app.route('/addCliked', methods = ['POST', 'GET'])
+def addLiked():
+    if request.method == 'POST':
+        try:
+            #Insert liked restaurant
+            cursor.execute()
+            db.commit()
+        except:
+            db.rollback()
+            return "Unsuccessful insert operation."
+        finally:
+            db.close()
+            return "Successfully added Restaurant"
 
 if __name__ == '__main__':
     app.run(debug=True)
