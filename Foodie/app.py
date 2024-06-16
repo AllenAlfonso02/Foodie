@@ -6,8 +6,8 @@ app = Flask(__name__)
 # Database connection parameters
 host = "localhost"
 user = "root"
-password = "septons"
-database = "foodie"
+password = "0179849Aa$"
+database = "Foodie"
 
 db = MySQLdb.connect(host=host, user=user, passwd=password, db=database)
 cursor = db.cursor()

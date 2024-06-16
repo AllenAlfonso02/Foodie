@@ -1,2 +1,0 @@
-# Foodie
-Restaurant Pairing App
