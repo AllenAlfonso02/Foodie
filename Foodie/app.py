@@ -67,9 +67,7 @@ def signup():
             print("Added to the database")
             db.commit()
             if accType == 'Establishment':
-                # Logic specific to Establishment account type
-                # Example: Redirect to a page for establishment setup
-                    return redirect(url_for('establishment_setup'))
+                cursor.execute("INSERT INTO 
 
             elif accType == 'Customer':
                 # Logic specific to Customer account type
