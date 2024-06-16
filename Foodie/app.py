@@ -131,5 +131,52 @@ def addfooditem():
             return render_template('addfooditem.html', error="Failed to add food item. Please try again.")
     return render_template('addfooditem.html')
 
+@app.route('/editrestaurant/<int:restaurant_id>', methods=['GET', 'POST'])
+def edit_restaurant(restaurant_id):
+    if request.method == 'GET':
+        try:
+            # Fetch restaurant details from the database
+            cursor.execute("SELECT * FROM restaurants WHERE id = %s", (restaurant_id,))
+            restaurant = cursor.fetchone()
+
+            # Assuming restaurant is a dictionary-like object with keys like 'closing_hours'
+            return render_template('edit_restaurant.html', restaurant=restaurant)
+        except MySQLdb.Error as e:
+            print(f"An error occurred: {e}")
+            return render_template('edit_restaurant.html', error="Failed to fetch restaurant details.")
+    
+    elif request.method == 'POST':
+        # Retrieve updated form data
+        restaurant_title = request.form['restaurant-title']
+        restaurant_description = request.form['restaurant-description']
+        restaurant_address = request.form['restaurant-address']
+        restaurant_state = request.form['restaurant-state']
+        restaurant_city = request.form['restaurant-city']
+        restaurant_zip = request.form['restaurant-zip']
+        restaurant_country = request.form['restaurant-country']
+        restaurant_phone = request.form['restaurant-phone']
+        restaurant_website = request.form['restaurant-website']
+        restaurant_openhours = request.form['restaurant-openhours']
+        restaurant_closehours = request.form['restaurant-closehours']
+
+        try:
+            # Update restaurant details in the database
+            cursor.execute("""
+                UPDATE restaurants 
+                SET name = %s, description = %s, address = %s, state = %s, city = %s, postal_code = %s,
+                    country = %s, phone_number = %s, website = %s, opening_hours = %s, closing_hours = %s
+                WHERE id = %s
+            """, (restaurant_title, restaurant_description, restaurant_address, restaurant_state,
+                  restaurant_city, restaurant_zip, restaurant_country, restaurant_phone,
+                  restaurant_website, restaurant_openhours, restaurant_closehours, restaurant_id))
+            db.commit()
+            print("Restaurant details updated successfully")
+            return redirect(url_for('edit_restaurant', restaurant_id=restaurant_id))
+        except MySQLdb.Error as e:
+            db.rollback()
+            print(f"An error occurred: {e}")
+            return render_template('edit_restaurant.html', error="Failed to update restaurant details.")
+
+
 if __name__ == '__main__':
     app.run(debug=True)
