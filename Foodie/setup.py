@@ -81,3 +81,24 @@ print("Table 'menu_items' created successfully.")
 
 cursor.execute("CREATE ROLE IF NOT EXISTS 'Establishment'")
 cursor.execute("CREATE ROLE IF NOT EXISTS 'Restaurant_user'")
+
+cursor.execute("CREATE ROLE IF NOT EXISTS 'customer_user'")
+cursor.execute("CREATE ROLE IF NOT EXISTS 'restaurant_user'")
+cursor.execute("CREATE ROLE IF NOT EXISTS 'admin'")
+
+roles_command = [
+    "GRANT SELECT ON Foodie.restaurants TO 'customer_user';",
+    "GRANT SELECT ON Foodie.menu_items TO 'customer_user';",
+    "GRANT SELECT, INSERT, UPDATE ON Foodie.customer TO 'customer_user';",
+    "GRANT SELECT, INSERT, UPDATE, DELETE ON Foodie.restaurants TO 'restaurant_user';",
+    "GRANT SELECT, INSERT, UPDATE, DELETE ON Foodie.menu_items TO 'restaurant_user';",
+]
+
+for command in roles_command:
+    cursor.execute(command)
+
+cursor.execute("SET ROLE ALL;")
+#cursor.execute("SET ROLE 'customer_user';")
+#cursor.execute("SET ROLE 'restaurant_user';")
+
+print("Roles set up")
