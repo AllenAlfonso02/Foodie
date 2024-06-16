@@ -70,7 +70,7 @@ def signup():
                 cursor.execute("INSERT INTO restaraunts (user_id) VALUES (newUser)")
 
             elif accType == 'Customer':
-                cursor.execute("INSERT INTO customer (username, password) VALUES (newUser, passWrd)
+                cursor.execute("INSERT INTO customer (username, password) VALUES (newUser, passWrd)")
 
         except MySQLdb.Error as e:
             db.rollback()
