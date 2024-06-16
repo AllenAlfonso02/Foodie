@@ -3,7 +3,7 @@ import MySQLdb
 # Database connection parameters
 host = "localhost"
 user = "root"
-password = ""
+password = "septons"
 
 db = MySQLdb.connect(host=host, user=user, passwd=password)
 cursor = db.cursor()
@@ -97,8 +97,8 @@ roles_command = [
 for command in roles_command:
     cursor.execute(command)
 
-cursor.execute("SET ROLE ALL;")
-#cursor.execute("SET ROLE 'customer_user';")
-#cursor.execute("SET ROLE 'restaurant_user';")
+#cursor.execute("SET ROLE ALL;")
+cursor.execute("SET ROLE 'customer_user';")
+cursor.execute("SET ROLE 'restaurant_user';")
 
 print("Roles set up")
