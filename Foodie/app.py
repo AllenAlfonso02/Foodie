@@ -35,8 +35,29 @@ def signin():
             result = cursor.fetchone()
 
             if result:
+                "Shows the grants for each user"
+                show_grants_query = "SHOW GRANTS FOR %s@'localhost' USING 'customer_user';"
+                cursor.execute(show_grants_query, (user,))
+                privileges = cursor.fetchall()
+
+                for privilege in privileges:
+                    print(privilege)
+                    "manually input the privileges  "
+                grant = [
+                    "GRANT SELECT ON Foodie.restaurants TO %s@'localhost';",
+                    "GRANT SELECT ON Foodie.menu_items TO %s@'localhost';",
+                    "GRANT SELECT, INSERT, UPDATE ON Foodie.customer TO %s@'localhost';"
+                ]
+                for command in grant:
+                    cursor.execute(command, (user,))
+                ###cursor.execute(grant, (user, ))
+
                 print("Login successful")
-                return render_template('mainpage.html')
+                cursor.execute("FLUSH PRIVILEGES;")
+                "Connects the login user to the database"
+                newDB = MySQLdb.connect(host="localhost", user=user, passwd=passWrd, db=database)
+                newCursor = newDB.cursor()
+
             else:
                 print("Invalid username or password")
                 return render_template('startingPage.html')
