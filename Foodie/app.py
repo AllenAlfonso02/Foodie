@@ -66,7 +66,15 @@ def signup():
                            (newUser, passWrd, accType))
             print("Added to the database")
             db.commit()
+            if accType == 'Establishment':
+                # Logic specific to Establishment account type
+                # Example: Redirect to a page for establishment setup
+                    return redirect(url_for('establishment_setup'))
 
+            elif accType == 'Customer':
+                # Logic specific to Customer account type
+                # Example: Redirect to a customer dashboard
+                    return redirect(url_for('customer_dashboard'))
 
         except MySQLdb.Error as e:
             db.rollback()
