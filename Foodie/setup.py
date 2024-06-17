@@ -97,7 +97,7 @@ roles_command = [
 #for command in roles_command:
 #    cursor.execute(command)
 
-#cursor.execute("SET ROLE ALL;")
+cursor.execute("SET ROLE ALL;")
 #cursor.execute("SET ROLE 'customer_user';")
 #cursor.execute("SET ROLE 'restaurant_user';")
 
