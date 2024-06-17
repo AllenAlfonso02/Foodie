@@ -144,19 +144,27 @@ def loadNext():
                 }
     return jsonify(testjson)
 
-@app.route('/addCliked', methods = ['POST', 'GET'])
+@app.route('/addClicked', methods=['POST'])
 def addLiked():
     if request.method == 'POST':
         try:
-            #Insert liked restaurant
-            cursor.execute()
+            user_id = 1  # Replace with the actual user ID from session or request
+            restaurant_id = request.json.get('restaurant_id')
+
+            if not restaurant_id:
+                return "Failed to get restaurant ID"
+
+            query = """
+                INSERT INTO liked_restaurants (user_id, restaurant_id)
+                VALUES (%s, %s)
+            """
+            cursor.execute(query, (user_id, restaurant_id))
             db.commit()
-        except:
-            db.rollback()
-            return "Unsuccessful insert operation."
-        finally:
-            db.close()
+
             return "Successfully added Restaurant"
+        except MySQLdb.Error as e:
+            db.rollback()
+            return "Unsuccessful insert operation"
 
 @app.route('/userMenuView', methods = ['POST', 'GET'])
 def showMenu():

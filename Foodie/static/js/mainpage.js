@@ -1,11 +1,21 @@
-function likeClicked(){
-    fetch('/addClicked', {method:'POST'}) 
-    .then(response => response.json())  //parse response
-    .then(data => console.log(data))       //do something with parsed data
+function likeClicked(restaurant) {
+    const restaurantData = {
+        restaurant_id: restaurant.id  // Assuming you have the restaurant ID
+    };
+
+    fetch('/addClicked', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(restaurantData)
+    })
+    .then(response => response.json())  // parse response
+    .then(data => console.log(data))  // do something with parsed data
     .catch(error => console.error(error));
 
-    loadInfo()
-    location.reload()
+    loadInfo();
+    location.reload();
 }
 
 function dislikeClicked(){
