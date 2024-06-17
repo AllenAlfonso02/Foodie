@@ -67,9 +67,12 @@ def signup():
             print("Added to the database")
             db.commit()
             cursor.execute("INSERT INTO customer (username, password) VALUES (newUser, passWrd)")
+            db.commit()
+            cursor.execute("SELECT id FROM customer WHERE username = %s", (newUser,))
+            customer_id = cursor.fetchone()
             if accType == 'Establishment':
-                cursor.execute("INSERT INTO restaraunts (user_id) VALUES (newUser)")
-
+                cursor.execute("INSERT INTO restaraunts (user_id) VALUES (%s)", (customer_id,))
+                db.commit()
         except MySQLdb.Error as e:
             db.rollback()
             print(f"An error occurred: {e}")
