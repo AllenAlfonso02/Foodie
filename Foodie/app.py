@@ -8,7 +8,7 @@ currentID = 0
 # Database connection parameters
 host = "localhost"
 user = "root"
-password = ""
+password = "septons"
 database = "Foodie"
 
 db = MySQLdb.connect(host=host, user=user, passwd=password, db=database)
@@ -38,7 +38,7 @@ def signin():
 
             if result:
                 "Shows the grants for each user"
-                show_grants_query = "SHOW GRANTS FOR %s@'localhost' USING 'customer_user';"
+                show_grants_query = "SHOW GRANTS FOR %s@'localhost'"
                 cursor.execute(show_grants_query, (user,))
                 privileges = cursor.fetchall()
 
@@ -47,13 +47,21 @@ def signin():
                     "manually input the privileges  "
                 
                 #TESTING HERE
-                cursor.execute("GRANT 'customer_user' TO %s@'localhost';", (user,))
+                cursor.execute("SELECT type FROM login WHERE name = %s", (user,))
+                result = cursor.fetchone()
+
+                if result[0] == "User":
+                    cursor.execute("GRANT 'customer_user' TO %s@'localhost';", (user,))
+                    print("Grants granted for user")
+                elif result[0] == "Establishment":
+                    cursor.execute("GRANT 'restaurant_user' TO %s@'localhost';", (user,))
+                    print("Grants granted for establishment")
+                else:
+                    print("Unknown user type")
 
                 cursor.execute("FLUSH PRIVILEGES;")
                 "Connects the login user to the database"
                 print("Login successful 0")
-                
-
                 newDB = MySQLdb.connect(host="localhost", user=user, passwd=passWrd, db=database)
                 print("Login successful 1")
                 
@@ -106,12 +114,12 @@ def signup():
                 if accType == "User":
                     cursor.execute(grant_user_query, (newUser,))
                     cursor.execute("FLUSH PRIVILEGES;")
-                    cursor.execute("SET ROLE customer_user")
+                    cursor.execute("SET ROLE 'customer_user'")
 
                 else:
                     cursor.execute(grant_restaurant_query, (newUser,))
                     cursor.execute("FLUSH PRIVILEGES;")
-                    cursor.execute("SET ROLE restaurant_user")
+                    cursor.execute("SET ROLE 'restaurant_user'")
                     
 
             # Add the new user to the database session
