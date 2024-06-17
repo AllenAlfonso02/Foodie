@@ -37,7 +37,9 @@ def signin():
             typeiden = cursor.fetchone()
             if typeiden == 'Establishment':
                 print("Establishment Login Successful")
-                return render_template('editrestaurant.html')
+                cursor.execute("SELECT * FROM restaurants WHERE id = %s", (restaurant_id,))
+                restaurant = cursor.fetchone()
+                return render_template('editrestaurant.html', restaurant=restaurant)
             elif typeden == 'User'
                 print("Customer Login Successful")
                 return render_template('mainpage.html')
