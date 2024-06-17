@@ -136,7 +136,7 @@ def addfooditem():
             return render_template('addfooditem.html', error="Failed to add food item. Please try again.")
     return render_template('addfooditem.html')
 
-@app.route('/editrestaurant/<int:restaurant_id>', methods=['GET', 'POST'])
+@app.route('/editrestaurant', methods=['GET', 'POST'])
 def edit_restaurant(restaurant_id):
     if request.method == 'GET':
         try:
