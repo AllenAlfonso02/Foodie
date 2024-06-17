@@ -1,5 +1,5 @@
 import MySQLdb
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 
 app = Flask(__name__)
 
@@ -208,6 +208,41 @@ def addfooditem():
             print(f"An error occurred: {e}")
             return render_template('addfooditem.html', error="Failed to add food item. Please try again.")
     return render_template('addfooditem.html')
+
+@app.route('/edituser', methods=['GET', 'POST'])
+def edit_user():
+    if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
+        phone_number = request.form['phone_number']
+        city = request.form['city']
+        state = request.form['state']
+        postal_code = request.form['postal_code']
+        country = request.form['country']
+
+        cursor.execute("""
+            INSERT INTO customer (username, email, password, first_name, last_name, phone_number, city, state, postal_code, country)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+                email=VALUES(email),
+                password=VALUES(password),
+                first_name=VALUES(first_name),
+                last_name=VALUES(last_name),
+                phone_number=VALUES(phone_number),
+                city=VALUES(city),
+                state=VALUES(state),
+                postal_code=VALUES(postal_code),
+                country=VALUES(country);
+        """, (username, email, password, first_name, last_name, phone_number, city, state, postal_code, country))
+        
+        db.commit()
+        return redirect(url_for('index'))
+    
+    return render_template('edituser.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
