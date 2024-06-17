@@ -16,7 +16,7 @@ cursor = db.cursor()
 
 @app.route('/')
 def home():
-    return render_template('editrestaurant.html')
+    return render_template('startingPage.html')
 
 
 @app.route('/signin', methods=['POST', 'GET'])
