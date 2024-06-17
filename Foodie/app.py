@@ -148,7 +148,6 @@ def edit_restaurant(restaurant_id):
             cursor.execute("SELECT * FROM restaurants WHERE id = %s", (restaurant_id,))
             restaurant = cursor.fetchone()
 
-            # Assuming restaurant is a dictionary-like object with keys like 'closing_hours'
             return render_template('editrestaurant.html', restaurant=restaurant)
         except MySQLdb.Error as e:
             print(f"An error occurred: {e}")
