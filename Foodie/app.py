@@ -33,9 +33,13 @@ def signin():
             cursor.execute("SELECT * FROM login WHERE EXISTS (SELECT * FROM login WHERE name = %s AND password = %s)",
                            (user, passWrd))
             result = cursor.fetchone()
-
-            if result:
-                print("Login successful")
+            cursor.execute("SELECT type FROM login WHERE name = %s and password = %s", (user, passWrd))
+            typeiden = cursor.fetchone()
+            if typeiden == 'Establishment':
+                print("Establishment Login Successful")
+                return render_template('editrestaurant.html')
+            elif typeden == 'User'
+                print("Customer Login Successful")
                 return render_template('mainpage.html')
             else:
                 print("Invalid username or password")
