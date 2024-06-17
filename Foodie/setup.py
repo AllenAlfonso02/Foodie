@@ -3,7 +3,7 @@ import MySQLdb
 # Database connection parameters
 host = "localhost"
 user = "root"
-password = "septons"
+password = ""
 
 db = MySQLdb.connect(host=host, user=user, passwd=password)
 cursor = db.cursor()
@@ -31,7 +31,7 @@ cursor.execute("""
         id INT AUTO_INCREMENT PRIMARY KEY,
         user_id INT NOT NULL,
         name VARCHAR(255) NOT NULL,
-        estaburl VARCHAR(255), 
+        estabImg VARCHAR(255), 
         address VARCHAR(255) NOT NULL,
         city VARCHAR(100) NOT NULL,
         state VARCHAR(100) NOT NULL,
@@ -105,11 +105,11 @@ roles_command = [
     "GRANT SELECT, INSERT, UPDATE, DELETE ON Foodie.menu_items TO 'restaurant_user';",
 ]
 
-for command in roles_command:
-    cursor.execute(command)
+#for command in roles_command:
+#    cursor.execute(command)
 
-#cursor.execute("SET ROLE ALL;")
-cursor.execute("SET ROLE 'customer_user';")
-cursor.execute("SET ROLE 'restaurant_user';")
+cursor.execute("SET ROLE ALL;")
+#cursor.execute("SET ROLE 'customer_user';")
+#cursor.execute("SET ROLE 'restaurant_user';")
 
 print("Roles set up")
