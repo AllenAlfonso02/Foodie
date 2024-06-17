@@ -79,6 +79,17 @@ CREATE TABLE if NOT EXISTS  menu_items (
 """)
 print("Table 'menu_items' created successfully.")
 
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS liked_restaurants (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    restaurant_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES customer(id),
+    FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+);
+""")
+print("Table 'liked_restaurants' created successfully.") 
+
 cursor.execute("CREATE ROLE IF NOT EXISTS 'Establishment'")
 cursor.execute("CREATE ROLE IF NOT EXISTS 'Restaurant_user'")
 
