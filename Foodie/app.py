@@ -95,7 +95,6 @@ def signup():
     db = MySQLdb.connect(host=host, user=user, passwd=password, db=database)
     cursor = db.cursor()
 
-
     if request.method == 'POST':
         newUser = request.form['newUserNameOrEmail']
         passWrd = request.form['newUserPassword']
@@ -144,6 +143,7 @@ def signup():
             return render_template('signup.html')
 
     else:
+        db.close()
         return render_template('signup.html')
 
 
