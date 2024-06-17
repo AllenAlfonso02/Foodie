@@ -3,10 +3,12 @@ from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
+currentID = 0
+
 # Database connection parameters
 host = "localhost"
 user = "root"
-password = "septons"
+password = "[EveryGoodHorseEats99Carrots]"
 database = "Foodie"
 
 db = MySQLdb.connect(host=host, user=user, passwd=password, db=database)
@@ -14,7 +16,7 @@ cursor = db.cursor()
 
 @app.route('/')
 def home():
-    return render_template('startingPage.html')
+    return render_template('editrestaurant.html')
 
 
 @app.route('/signin', methods=['POST', 'GET'])
