@@ -3,18 +3,24 @@ from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-# Database connection parameters
-host = "localhost"
-user = "root"
-password = "0179849Aa$"
-database = "Foodie"
-
-db = MySQLdb.connect(host=host, user=user, passwd=password, db=database)
-cursor = db.cursor()
-
 @app.route('/')
 def home():
     return render_template('startingPage.html')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 @app.route('/signin', methods=['POST', 'GET'])
@@ -24,6 +30,13 @@ def signin():
 
         user = request.form['userNameOrEmail']
         passWrd = request.form['userPassword']
+
+        print("Error 1")
+        
+        db = MySQLdb.connect(host="localhost", user=user, passwd=passWrd, db="Foodie")
+        print("Error 2")
+        cursor = db.cursor()
+        print("Error 3")
 
         print(user)
         print(passWrd)
@@ -44,19 +57,8 @@ def signin():
                     print(privilege)
                     "manually input the privileges  "
                 
-                #TESTING HERE
-                cursor.execute("GRANT 'customer_user' TO %s@'localhost';", (user,))
-
-                cursor.execute("FLUSH PRIVILEGES;")
                 "Connects the login user to the database"
                 print("Login successful 0")
-                
-
-                newDB = MySQLdb.connect(host="localhost", user=user, passwd=passWrd, db=database)
-                print("Login successful 1")
-                
-                newCursor = newDB.cursor()
-                print("Login successful 2")
 
                 #newDb.close()
                 return render_template('mainpage.html')
@@ -75,8 +77,25 @@ def signin():
         return render_template('signin.html')
 
 
+
+
+
+
+
+
 @app.route('/signup', methods=['POST', 'GET'])
 def signup():
+
+    # Database connection parameters
+    host = "localhost"
+    user = "root"
+    password = "0179849Aa$"
+    database = "Foodie"
+
+    db = MySQLdb.connect(host=host, user=user, passwd=password, db=database)
+    cursor = db.cursor()
+
+
     if request.method == 'POST':
         newUser = request.form['newUserNameOrEmail']
         passWrd = request.form['newUserPassword']
@@ -104,12 +123,11 @@ def signup():
                 if accType == "User":
                     cursor.execute(grant_user_query, (newUser,))
                     cursor.execute("FLUSH PRIVILEGES;")
-                    cursor.execute("SET ROLE customer_user")
 
                 else:
                     cursor.execute(grant_restaurant_query, (newUser,))
                     cursor.execute("FLUSH PRIVILEGES;")
-                    cursor.execute("SET ROLE restaurant_user")
+
                     
 
             # Add the new user to the database session
@@ -122,10 +140,39 @@ def signup():
             db.rollback()
             print(f"An error occurred: {e}")
         finally:
+            db.close()
             return render_template('signup.html')
 
     else:
         return render_template('signup.html')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 @app.route('/mainpage')
@@ -169,7 +216,7 @@ def showMenu():
             rows = cursor.fetchall()
 
         except:
-            return render_template('userMenuView.html')
+            return render_template('userMenuView.html', rows = rows)
 
     else:
         return render_template('startingPage.html') 

@@ -79,9 +79,6 @@ CREATE TABLE if NOT EXISTS  menu_items (
 """)
 print("Table 'menu_items' created successfully.")
 
-cursor.execute("CREATE ROLE IF NOT EXISTS 'Establishment'")
-cursor.execute("CREATE ROLE IF NOT EXISTS 'Restaurant_user'")
-
 cursor.execute("CREATE ROLE IF NOT EXISTS 'customer_user'")
 cursor.execute("CREATE ROLE IF NOT EXISTS 'restaurant_user'")
 cursor.execute("CREATE ROLE IF NOT EXISTS 'admin'")
