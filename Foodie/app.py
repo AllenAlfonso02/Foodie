@@ -8,7 +8,7 @@ currentID = 0
 # Database connection parameters
 host = "localhost"
 user = "root"
-password = "[EveryGoodHorseEats99Carrots]"
+password = ""
 database = "Foodie"
 
 db = MySQLdb.connect(host=host, user=user, passwd=password, db=database)
