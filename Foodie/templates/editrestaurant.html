@@ -55,6 +55,13 @@
         .food-table tr.selected {
             background-color: #e9ecef;
         }
+        ul {
+            columns: 2;
+	    }
+	    .column {
+            float: left;
+            width: 50%;
+        }
         .actions {
             text-align: center;
             margin-top: 20px;
@@ -118,7 +125,40 @@
                 <label for="restaurant-closehours">Restaurant Closing Hours:</label>
                 <input type="text" id="restaurant-closehours" name="restaurant-closehours" value="{{ restaurant['close_hours'] }}">
             </div>
-
+            <ul class="ul">
+            <div class="column">
+                <input type="checkbox" id="American" name="American" value="American">
+                <label for="American"> American</label><br>
+                <input type="checkbox" id="French" name="French" value="French">
+                <label for="French"> French</label><br>
+                <input type="checkbox" id="Japanese" name="Japanese" value="Japanese">
+                <label for="Japanese"> Japanese</label><br>
+            </div>
+            <div class="column">
+                <input type="checkbox" id="Italian" name="Italian" value="Italian">
+                <label for="Italian"> Italian</label><br>
+                <input type="checkbox" id="Middle Eatern" name="Middle Eatern" value="Middle Eatern">
+                <label for="Middle Eatern"> Middle Eatern</label><br>
+                <input type="checkbox" id="Chinese" name="Chinese" value="Chinese">
+                <label for="Chinese"> Chinese</label><br>
+            </div>
+            <div class="column">
+                <input type="checkbox" id="Mexican" name="Mexican" value="Mexican">
+                <label for="Mexican"> Mexican</label><br>
+                <input type="checkbox" id="Greek" name="Greek" value="Greek">
+                <label for="Greek"> Greek</label><br>
+                <input type="checkbox" id="Thai" name="Thai" value="Thai">
+                <label for="Thai"> Thai</label><br>
+            </div>
+            <div class="column">
+                <input type="checkbox" id="Indian" name="Indian" value="Indian">
+                <label for="Indian"> Indian</label><br>
+                <input type="checkbox" id="Caribbean" name="Caribbean" value="Caribbean">
+                <label for="Caribbean"> Caribbean</label><br>
+                <input type="checkbox" id="Korean" name="Korean" value="Korean">
+                <label for="Korean"> Korean</label><br>
+            </div>
+	</ul>
             <!-- Food items section -->
             <div class="food-list">
                 <h2>Food Items</h2>

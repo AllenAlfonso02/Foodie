@@ -73,6 +73,10 @@ def signin():
                 elif result[0] == "Establishment":
                     cursor.execute("GRANT 'restaurant_user' TO %s@'localhost';", (user,))
                     print("Grants granted for establishment")
+                    cursor.execute("SELECT * FROM restaurants WHERE id = %s", (user,))
+                    print("1")
+                    restaurant = cursor.fetchone()
+                    return render_template('editrestaurant.html', restaurant=restaurant)
                 else:
                     print("Unknown user type")
                 cursor.execute("FLUSH PRIVILEGES;")
@@ -94,7 +98,7 @@ def signin():
 
         except MySQLdb.Error as e:
             print(f"An error occurred: {e}")
-            return render_template('singin.html')
+            return render_template('signin.html')
 
     elif (request.method == 'GET'):
         return render_template('signin.html')
@@ -252,45 +256,72 @@ def edit_restaurant():
             cursor.execute("SELECT CURRENT_USER()")
             result = cursor.fetchone()
             # Parse the username (everything before '@')
-            name = result.split('@')
+            name = result.split('@')[0]
             cursor.execute("SELECT id FROM login WHERE name = %s", (name,))
             I = cursor.fetchone()
             # Fetch restaurant details from the database
-            cursor.execute("SELECT * FROM restaurants WHERE user_id = %s", (I,))
+            cursor.execute("SELECT user_id FROM restaurants WHERE user_id = %s", (I,))
+            restaurant_id = cursor.fetchone()
+
+            # Fetch restaurant details using fetched restaurant_id
+            cursor.execute("SELECT * FROM restaurants WHERE id = %s", (restaurant_id,))
             restaurant = cursor.fetchone()
 
-            return render_template('editrestaurant.html', restaurant=restaurant)
+            if restaurant:
+                return render_template('editrestaurant.html', restaurant=restaurant)
+            else:
+                return render_template('editrestaurant.html', error="Restaurant not found.")
+            
         except MySQLdb.Error as e:
             print(f"An error occurred: {e}")
             return render_template('editrestaurant.html', error="Failed to fetch restaurant details.")
     
     elif request.method == 'POST':
-        # Retrieve updated form data
-        restaurant_title = request.form['restaurant-title']
-        restaurant_description = request.form['restaurant-description']
-        restaurant_address = request.form['restaurant-address']
-        restaurant_state = request.form['restaurant-state']
-        restaurant_city = request.form['restaurant-city']
-        restaurant_zip = request.form['restaurant-zip']
-        restaurant_country = request.form['restaurant-country']
-        restaurant_phone = request.form['restaurant-phone']
-        restaurant_website = request.form['restaurant-website']
-        restaurant_openhours = request.form['restaurant-openhours']
-        restaurant_closehours = request.form['restaurant-closehours']
-
+        # Similar to GET method, fetch and update restaurant details
         try:
-            # Update restaurant details in the database
-            cursor.execute("""
-                UPDATE restaurants 
-                SET name = %s, description = %s, address = %s, state = %s, city = %s, postal_code = %s,
-                    country = %s, phone_number = %s, website = %s, opening_hours = %s, closing_hours = %s
-                WHERE id = %s
-            """, (restaurant_title, restaurant_description, restaurant_address, restaurant_state,
-                  restaurant_city, restaurant_zip, restaurant_country, restaurant_phone,
-                  restaurant_website, restaurant_openhours, restaurant_closehours, restaurant_id))
-            db.commit()
-            print("Restaurant details updated successfully")
-            return redirect(url_for('editrestaurant', restaurant=restaurant))
+            cursor.execute("SELECT CURRENT_USER()")
+            result = cursor.fetchone()
+            # Parse the username (everything before '@')
+            name = result.split('@')[0]
+            cursor.execute("SELECT id FROM login WHERE name = %s", (name,))
+            I = cursor.fetchone()
+            # Fetch restaurant details from the database
+            cursor.execute("SELECT user_id FROM restaurants WHERE user_id = %s", (I,))
+            restaurant_id = cursor.fetchone()
+
+            # Assuming 'restaurant_id' is the correct identifier for your restaurant
+            cursor.execute("SELECT * FROM restaurants WHERE id = %s", (restaurant_id,))
+            restaurant = cursor.fetchone()
+
+            if restaurant:
+                # Retrieve updated form data
+                restaurant_title = request.form['restaurant-title']
+                restaurant_description = request.form['restaurant-description']
+                restaurant_address = request.form['restaurant-address']
+                restaurant_state = request.form['restaurant-state']
+                restaurant_city = request.form['restaurant-city']
+                restaurant_zip = request.form['restaurant-zip']
+                restaurant_country = request.form['restaurant-country']
+                restaurant_phone = request.form['restaurant-phone']
+                restaurant_website = request.form['restaurant-website']
+                restaurant_openhours = request.form['restaurant-openhours']
+                restaurant_closehours = request.form['restaurant-closehours']
+
+                # Update restaurant details in the database
+                cursor.execute("""
+                    UPDATE restaurants 
+                    SET name = %s, description = %s, address = %s, state = %s, city = %s, postal_code = %s,
+                        country = %s, phone_number = %s, website = %s, opening_hours = %s, closing_hours = %s
+                    WHERE id = %s
+                """, (restaurant_title, restaurant_description, restaurant_address, restaurant_state,
+                      restaurant_city, restaurant_zip, restaurant_country, restaurant_phone,
+                      restaurant_website, restaurant_openhours, restaurant_closehours, restaurant_id))
+                db.commit()
+                print("Restaurant details updated successfully")
+                return redirect(url_for('editrestaurant'))
+            else:
+                return render_template('editrestaurant.html', error="Restaurant not found.")
+            
         except MySQLdb.Error as e:
             db.rollback()
             print(f"An error occurred: {e}")

@@ -45,7 +45,8 @@ cursor.execute("""
         cuisine_type VARCHAR(100),
         price_range VARCHAR(50),
         opening_hours VARCHAR(255),
-        closing_hours VARCHAR(255)
+        closing_hours VARCHAR(255),
+        FOREIGN KEY (user_id) REFERENCES login(id)
 );
 """)
 print("Table 'restaurants' created successfully.")
