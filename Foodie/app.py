@@ -212,9 +212,6 @@ def addfooditem():
 @app.route('/edituser', methods=['GET', 'POST'])
 def edit_user():
     if request.method == 'POST':
-        username = request.form['username']
-        email = request.form['email']
-        password = request.form['password']
         first_name = request.form['first_name']
         last_name = request.form['last_name']
         phone_number = request.form['phone_number']
@@ -222,27 +219,24 @@ def edit_user():
         state = request.form['state']
         postal_code = request.form['postal_code']
         country = request.form['country']
+        
+        login_id = session['login_id']  # Example of getting login_id from session
 
         cursor.execute("""
-            INSERT INTO customer (username, email, password, first_name, last_name, phone_number, city, state, postal_code, country)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            ON DUPLICATE KEY UPDATE
-                email=VALUES(email),
-                password=VALUES(password),
-                first_name=VALUES(first_name),
-                last_name=VALUES(last_name),
-                phone_number=VALUES(phone_number),
-                city=VALUES(city),
-                state=VALUES(state),
-                postal_code=VALUES(postal_code),
-                country=VALUES(country);
-        """, (username, email, password, first_name, last_name, phone_number, city, state, postal_code, country))
+            UPDATE customer
+            SET first_name=%s, last_name=%s, phone_number=%s, city=%s, state=%s, postal_code=%s, country=%s
+            WHERE login_id=%s
+        """, (first_name, last_name, phone_number, city, state, postal_code, country, login_id))
         
         db.commit()
-        return redirect(url_for('index'))
-    
-    return render_template('edituser.html')
+        return redirect(url_for('mainpage'))  
 
+    elif request.method == 'GET':
+        login_id = session['login_id'] 
+        cursor.execute("SELECT * FROM customer WHERE login_id = %s", (login_id,))
+        customer_data = cursor.fetchone()
+        
+        return render_template('edituser.html', customer=customer_data, username=session['username'])
 
 if __name__ == '__main__':
     app.run(debug=True)

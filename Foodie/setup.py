@@ -46,21 +46,20 @@ cursor.execute("""
 );
 """)
 print("Table 'restaurants' created successfully.")
-
+# changed so there is foreign key and no need for username and password in this table as that information is covered the login info
 cursor.execute("""
-CREATE TABLE IF NOT EXISTS customer (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    first_name VARCHAR(100),
-    last_name VARCHAR(100),
-    phone_number VARCHAR(20),
-    city VARCHAR(100) NOT NULL,
-    state VARCHAR(100) NOT NULL,
-    postal_code VARCHAR(20),
-    country VARCHAR(100) NOT NULL
-);
+    CREATE TABLE IF NOT EXISTS customer (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        login_id INT UNIQUE NOT NULL,
+        first_name VARCHAR(100),
+        last_name VARCHAR(100),
+        phone_number VARCHAR(20),
+        city VARCHAR(100) NOT NULL,
+        state VARCHAR(100) NOT NULL,
+        postal_code VARCHAR(20),
+        country VARCHAR(100) NOT NULL,
+        FOREIGN KEY (login_id) REFERENCES login(id) ON DELETE CASCADE
+    );
 """)
 print("Table 'customer' created successfully.")
 
