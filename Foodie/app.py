@@ -1,18 +1,35 @@
 import MySQLdb
 from flask import Flask, render_template, request, jsonify, redirect, url_for
+import MySQLdb.cursors
 
 app = Flask(__name__)
 
 currentID = 0
 
-# Database connection parameters
-host = "localhost"
-user = "root"
-password = ""
-database = "Foodie"
 
-db = MySQLdb.connect(host=host, user=user, passwd=password, db=database)
-cursor = db.cursor()
+# Database connection parameters
+class mySQLClass:
+    def __init__(self, host, user, password):
+        self.host = host
+        self.user = user
+        self.password = password
+        self.database = "Foodie"
+
+    def connect(self):
+        self.connection = MySQLdb.connect(
+            host=self.host, user=self.user, password=self.password, database=self.database
+        )
+        return self.connection
+
+    def change(self, user, password):
+        self.user = user
+        self.password = password
+
+
+db = mySQLClass("localhost", "root", "septons")
+newDB = db.connect()
+cursor = newDB.cursor()
+
 
 @app.route('/')
 def home():
@@ -38,36 +55,42 @@ def signin():
 
             if result:
                 "Shows the grants for each user"
-                show_grants_query = "SHOW GRANTS FOR %s@'localhost' USING 'customer_user';"
+                show_grants_query = "SHOW GRANTS FOR %s@'localhost'"
                 cursor.execute(show_grants_query, (user,))
                 privileges = cursor.fetchall()
 
                 for privilege in privileges:
                     print(privilege)
                     "manually input the privileges  "
-                
-                #TESTING HERE
-                cursor.execute("GRANT 'customer_user' TO %s@'localhost';", (user,))
 
+                #TESTING HERE
+                cursor.execute("SELECT type FROM login WHERE name = %s", (user,))
+                result = cursor.fetchone()
+
+                if result[0] == "User":
+                    cursor.execute("GRANT 'customer_user' TO %s@'localhost';", (user,))
+                    print("Grants granted for user")
+                elif result[0] == "Establishment":
+                    cursor.execute("GRANT 'restaurant_user' TO %s@'localhost';", (user,))
+                    print("Grants granted for establishment")
+                else:
+                    print("Unknown user type")
                 cursor.execute("FLUSH PRIVILEGES;")
                 "Connects the login user to the database"
                 print("Login successful 0")
-                
 
-                newDB = MySQLdb.connect(host="localhost", user=user, passwd=passWrd, db=database)
+                db.change(user, passWrd)
+                newDB = db.connect()
+                newCursor = newDB.cursor
                 print("Login successful 1")
-                
-                newCursor = newDB.cursor()
+
                 print("Login successful 2")
 
-                #newDb.close()
+                cursor.close()
                 return render_template('mainpage.html')
-
-
             else:
                 print("Invalid username or password")
                 return render_template('startingPage.html')
-
 
         except MySQLdb.Error as e:
             print(f"An error occurred: {e}")
@@ -79,6 +102,7 @@ def signin():
 
 @app.route('/signup', methods=['POST', 'GET'])
 def signup():
+
     if request.method == 'POST':
         newUser = request.form['newUserNameOrEmail']
         passWrd = request.form['newUserPassword']
@@ -106,13 +130,12 @@ def signup():
                 if accType == "User":
                     cursor.execute(grant_user_query, (newUser,))
                     cursor.execute("FLUSH PRIVILEGES;")
-                    cursor.execute("SET ROLE customer_user")
+                    cursor.execute("SET ROLE 'customer_user'")
 
                 else:
                     cursor.execute(grant_restaurant_query, (newUser,))
                     cursor.execute("FLUSH PRIVILEGES;")
-                    cursor.execute("SET ROLE restaurant_user")
-                    
+                    cursor.execute("SET ROLE 'restaurant_user'")
 
             # Add the new user to the database session
 
@@ -134,15 +157,18 @@ def signup():
 def mainpage():
     return render_template('mainpage.html')
 
+
 @app.route('/loadNext')
 def loadNext():
     #select statement
-    global currentID; currentID += 1
-    testjson = {"picture" : "https://www.connarchitects.com/wp-content/uploads/2019/09/CONN_Edison-2.jpg",
-                "name" : "Dummy Restaurant",
-                "description" : "This is a json created to test my restaurant.fdhfkjsdhfjdshfkhdskfhkjfsdhjdfhksfhjkhsfkdhfds",
+    global currentID;
+    currentID += 1
+    testjson = {"picture": "https://www.connarchitects.com/wp-content/uploads/2019/09/CONN_Edison-2.jpg",
+                "name": "Dummy Restaurant",
+                "description": "This is a json created to test my restaurant.fdhfkjsdhfjdshfkhdskfhkjfsdhjdfhksfhjkhsfkdhfds",
                 }
     return jsonify(testjson)
+
 
 @app.route('/addClicked', methods=['POST'])
 def addLiked():
@@ -166,7 +192,8 @@ def addLiked():
             db.rollback()
             return "Unsuccessful insert operation"
 
-@app.route('/userMenuView', methods = ['POST', 'GET'])
+
+@app.route('/userMenuView', methods=['POST', 'GET'])
 def showMenu():
     if (request.method == 'GET'):
         try:
@@ -182,13 +209,14 @@ def showMenu():
             return render_template('userMenuView.html')
 
     else:
-        return render_template('startingPage.html') 
-    
+        return render_template('startingPage.html')
+
+
 @app.route('/addfooditem', methods=['POST'])
 def addfooditem():
     if request.method == 'POST':
         # Retrieve form data
-        restaurant_id = request.form['restaurant_id'] 
+        restaurant_id = request.form['restaurant_id']
         food_name = request.form['food-name']
         food_description = request.form['food-description']
         food_price = request.form['food-price']
