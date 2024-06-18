@@ -148,8 +148,12 @@ def addfooditem():
 def edit_restaurant(restaurant_id):
     if request.method == 'GET':
         try:
+            cursor.execute("SELECT * FROM user")
+            L = cursor.fetchone()
+            cursor.execute("SELECT user_id FROM login WHERE username = %s", (L,))
+            I = cursor.fetchone()
             # Fetch restaurant details from the database
-            cursor.execute("SELECT * FROM restaurants WHERE id = %s", (restaurant_id,))
+            cursor.execute("SELECT * FROM restaurants WHERE id = %s", (I,))
             restaurant = cursor.fetchone()
 
             return render_template('editrestaurant.html', restaurant=restaurant)
