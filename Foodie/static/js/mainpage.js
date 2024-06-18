@@ -1,17 +1,15 @@
-function likeClicked(restaurant) {
-    const restaurantData = {
-        restaurant_id: restaurant.id  // Assuming you have the restaurant ID
-    };
+function likeClicked() {
+    let id = sessionStorage.getItem('current')      
 
     fetch('/addClicked', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify(restaurantData)
+        body: id            //this was stored as a JSON, no need to convert
     })
-    .then(response => response.json())  // parse response
-    .then(data => console.log(data))  // do something with parsed data
+    .then(response => response.json())  
+    .then(data => console.log(data))  
     .catch(error => console.error(error));
 
     loadInfo();
@@ -20,20 +18,22 @@ function likeClicked(restaurant) {
 
 function dislikeClicked(){
     loadInfo()
-    location.reload()
+    location.reload();
 }
 
 function loadInfo(){
     fetch('/loadNext')
     .then(response => response.json())
     .then(data => {
+        sessionStorage.setItem('current', JSON.stringify({id : data.id}))   //storing the id to use later in likeClicked
+
         document.getElementById("r_Name").textContent = data.name;
-        document.getElementById("r_Desc").textContent = data.description;
+        document.getElementById("r_Desc").textContent = data.cuisine_type;
         img = document.getElementById("r_Img")
         img.addEventListener("error", function(event) {
             event.target.src = "/static/images/No-Image-Placeholder.svg.png"
             event.onerror = null
         })
-        img.src = data.picture;
+        img.src = data.estabImg;
     }).catch(error => console.error(error))
 }

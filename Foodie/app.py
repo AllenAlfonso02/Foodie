@@ -1,5 +1,5 @@
 import MySQLdb
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Response
 
 app = Flask(__name__)
 
@@ -16,8 +16,7 @@ cursor = db.cursor()
 
 @app.route('/')
 def home():
-    return render_template('startingPage.html')
-
+    return render_template('mainpage.html')
 
 @app.route('/signin', methods=['POST', 'GET'])
 def signin():
@@ -137,38 +136,67 @@ def mainpage():
 @app.route('/loadNext')
 def loadNext():
     global currentID
-
-    customer = ' '
+    default = ['Not available', '', '', '']
     valid = False
-    while not valid:
-        cursor.execute("SELECT name, cuisine_type, estabImg FROM restaurants LEFT JOIN liked_restaurants ON restaurants.id = restaurant_id WHERE restaurants.id = %s AND restaurant_id IS NULL", (currentID))
-        crantaust= cursor.fetchone()
-        if customer is not None:
-            valid = True
+    userID = 1
 
-    return jsonify(customer)
+    cursor.execute("SELECT MAX(id) FROM restaurants")
+    maxID = cursor.fetchone()[0]
+    print(f'The largest ID was {maxID}')
+    i = 0
+    try:
+        while not valid and i < 50:
+                if currentID <= maxID:  
+                    print(f'i = {i}')
+                    i += 1
+                    print(f'\nCurrentID = {currentID}\n')
+                    
+                    cursor.execute("""SELECT name, cuisine_type, estabImg, restaurants.id FROM restaurants  LEFT JOIN liked_restaurants lr ON restaurants.id = lr.restaurant_id AND lr.user_id = %s WHERE restaurants.id = %s AND lr.restaurant_id IS NULL """, (userID, currentID))
+                    
+                    restaurant = cursor.fetchone()
+                    currentID += 1
 
-@app.route('/addClicked', methods=['POST'])
+                    if restaurant is not None:
+                        valid = True
+
+                        for r in restaurant:
+                            print(r)
+                else:
+                    currentID = 0
+
+        restjson = {'name': restaurant[0],
+                'cuisine_type': restaurant[1],
+                'estabImg' : restaurant[2],
+                'id' : restaurant[3]
+                }
+    except Exception as e:
+            print(e)
+            restjson = {'name': default[0],
+                        'cuisine_type': default[1],
+                        'estabImg' : default[2],
+                        'id' : default[3]
+                        }
+    
+    return jsonify(restjson)
+
+@app.route('/addClicked', methods = ['POST','GET'])
 def addLiked():
     if request.method == 'POST':
         try:
-            user_id = 1  # Replace with the actual user ID from session or request
-            restaurant_id = request.json.get('restaurant_id')
-
+            user_id = 2  # Replace with the actual user ID from session or request
+            restaurant_id = request.json.get('id')
+            
             if not restaurant_id:
+                print('\Operation to add liked restaurant failed.\n')
                 return "Failed to get restaurant ID"
 
-            query = """
-                INSERT INTO liked_restaurants (user_id, restaurant_id)
-                VALUES (%s, %s)
-            """
-            cursor.execute(query, (user_id, restaurant_id))
+            cursor.execute("INSERT INTO liked_restaurants (user_id, restaurant_id) VALUES (%s, %s)", (user_id, restaurant_id))
             db.commit()
 
-            return "Successfully added Restaurant"
         except MySQLdb.Error as e:
             db.rollback()
-            return "Unsuccessful insert operation"
+            return 'operation unsuccessful'
+        return 'operation succeeded'
 
 @app.route('/userMenuView', methods = ['POST', 'GET'])
 def showMenu():
