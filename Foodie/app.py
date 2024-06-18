@@ -136,13 +136,17 @@ def mainpage():
 
 @app.route('/loadNext')
 def loadNext():
-    #select statement
-    global currentID; currentID += 1
-    testjson = {"picture" : "https://www.connarchitects.com/wp-content/uploads/2019/09/CONN_Edison-2.jpg",
-                "name" : "Dummy Restaurant",
-                "description" : "This is a json created to test my restaurant.fdhfkjsdhfjdshfkhdskfhkjfsdhjdfhksfhjkhsfkdhfds",
-                }
-    return jsonify(testjson)
+    global currentID
+
+    customer = ' '
+    valid = False
+    while not valid:
+        cursor.execute("SELECT name, cuisine_type, estabImg FROM restaurants LEFT JOIN liked_restaurants ON restaurants.id = restaurant_id WHERE restaurants.id = %s AND restaurant_id IS NULL", (currentID))
+        crantaust= cursor.fetchone()
+        if customer is not None:
+            valid = True
+
+    return jsonify(customer)
 
 @app.route('/addClicked', methods=['POST'])
 def addLiked():
