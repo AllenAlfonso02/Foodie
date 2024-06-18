@@ -160,7 +160,7 @@ def edit_restaurant():
             cursor.execute("SELECT CURRENT_USER()")
             result = cursor.fetchone()
             # Parse the username (everything before '@')
-            name = result.split('@')[0]
+            name = result.split('@')
             cursor.execute("SELECT id FROM login WHERE name = %s", (name,))
             I = cursor.fetchone()
             # Fetch restaurant details from the database
