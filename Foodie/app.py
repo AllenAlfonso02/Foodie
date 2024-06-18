@@ -145,18 +145,20 @@ def addfooditem():
     return render_template('addfooditem.html')
 
 @app.route('/editrestaurant', methods=['GET', 'POST'])
-def edit_restaurant(restaurant_id):
+def edit_restaurant():
     if request.method == 'GET':
         try:
-            cursor.execute("SELECT USER")
-            L = cursor.fetchone()
-            cursor.execute("SELECT user_id FROM login WHERE name = %s", (L,))
+            cursor.execute("SELECT CURRENT_USER()")
+            result = cursor.fetchone()
+            # Parse the username (everything before '@')
+            name = result.split('@')[0]
+            cursor.execute("SELECT user_id FROM login WHERE name = %s", (name,))
             I = cursor.fetchone()
             # Fetch restaurant details from the database
             cursor.execute("SELECT * FROM restaurants WHERE id = %s", (I,))
             restaurant = cursor.fetchone()
 
-            return render_template('editrestaurant.html', restaurant=restaurant)
+            return render_template('editrestaurant.html')
         except MySQLdb.Error as e:
             print(f"An error occurred: {e}")
             return render_template('editrestaurant.html', error="Failed to fetch restaurant details.")
@@ -187,7 +189,7 @@ def edit_restaurant(restaurant_id):
                   restaurant_website, restaurant_openhours, restaurant_closehours, restaurant_id))
             db.commit()
             print("Restaurant details updated successfully")
-            return redirect(url_for('editrestaurant', restaurant_id=restaurant_id))
+            return redirect(url_for('editrestaurant',))
         except MySQLdb.Error as e:
             db.rollback()
             print(f"An error occurred: {e}")
