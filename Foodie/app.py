@@ -150,7 +150,7 @@ def edit_restaurant(restaurant_id):
         try:
             cursor.execute("SELECT * FROM user")
             L = cursor.fetchone()
-            cursor.execute("SELECT user_id FROM login WHERE username = %s", (L,))
+            cursor.execute("SELECT user_id FROM login WHERE name = %s", (L,))
             I = cursor.fetchone()
             # Fetch restaurant details from the database
             cursor.execute("SELECT * FROM restaurants WHERE id = %s", (I,))
