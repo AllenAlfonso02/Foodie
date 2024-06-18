@@ -158,7 +158,7 @@ def edit_restaurant():
             cursor.execute("SELECT * FROM restaurants WHERE id = %s", (I,))
             restaurant = cursor.fetchone()
 
-            return render_template('editrestaurant.html')
+            return render_template('editrestaurant.html', restaurant=restaurant)
         except MySQLdb.Error as e:
             print(f"An error occurred: {e}")
             return render_template('editrestaurant.html', error="Failed to fetch restaurant details.")
@@ -189,7 +189,7 @@ def edit_restaurant():
                   restaurant_website, restaurant_openhours, restaurant_closehours, restaurant_id))
             db.commit()
             print("Restaurant details updated successfully")
-            return redirect(url_for('editrestaurant',))
+            return redirect(url_for('editrestaurant', restaurant=restaurant))
         except MySQLdb.Error as e:
             db.rollback()
             print(f"An error occurred: {e}")
