@@ -211,12 +211,20 @@ def showMenu():
     else:
         return render_template('startingPage.html')
 
-
 @app.route('/addfooditem', methods=['POST'])
 def addfooditem():
     if request.method == 'POST':
         # Retrieve form data
-        restaurant_id = request.form['restaurant_id']
+        cursor.execute("SELECT CURRENT_USER()")
+        result = cursor.fetchone()
+        # Parse the username (everything before '@')
+        name = result.split('@')[0]
+        cursor.execute("SELECT id FROM login WHERE name = %s", (name,))
+        I = cursor.fetchone()
+        # Fetch restaurant details from the database
+        cursor.execute("SELECT id FROM restaurants WHERE user_id = %s", (I,))
+        theid = cursor.fetchone()
+        restaurant_id = theid
         food_name = request.form['food-name']
         food_description = request.form['food-description']
         food_price = request.form['food-price']
@@ -237,6 +245,57 @@ def addfooditem():
             return render_template('addfooditem.html', error="Failed to add food item. Please try again.")
     return render_template('addfooditem.html')
 
+@app.route('/editrestaurant', methods=['GET', 'POST'])
+def edit_restaurant():
+    if request.method == 'GET':
+        try:
+            cursor.execute("SELECT CURRENT_USER()")
+            result = cursor.fetchone()
+            # Parse the username (everything before '@')
+            name = result.split('@')
+            cursor.execute("SELECT id FROM login WHERE name = %s", (name,))
+            I = cursor.fetchone()
+            # Fetch restaurant details from the database
+            cursor.execute("SELECT * FROM restaurants WHERE user_id = %s", (I,))
+            restaurant = cursor.fetchone()
+
+            return render_template('editrestaurant.html', restaurant=restaurant)
+        except MySQLdb.Error as e:
+            print(f"An error occurred: {e}")
+            return render_template('editrestaurant.html', error="Failed to fetch restaurant details.")
+    
+    elif request.method == 'POST':
+        # Retrieve updated form data
+        restaurant_title = request.form['restaurant-title']
+        restaurant_description = request.form['restaurant-description']
+        restaurant_address = request.form['restaurant-address']
+        restaurant_state = request.form['restaurant-state']
+        restaurant_city = request.form['restaurant-city']
+        restaurant_zip = request.form['restaurant-zip']
+        restaurant_country = request.form['restaurant-country']
+        restaurant_phone = request.form['restaurant-phone']
+        restaurant_website = request.form['restaurant-website']
+        restaurant_openhours = request.form['restaurant-openhours']
+        restaurant_closehours = request.form['restaurant-closehours']
+
+        try:
+            # Update restaurant details in the database
+            cursor.execute("""
+                UPDATE restaurants 
+                SET name = %s, description = %s, address = %s, state = %s, city = %s, postal_code = %s,
+                    country = %s, phone_number = %s, website = %s, opening_hours = %s, closing_hours = %s
+                WHERE id = %s
+            """, (restaurant_title, restaurant_description, restaurant_address, restaurant_state,
+                  restaurant_city, restaurant_zip, restaurant_country, restaurant_phone,
+                  restaurant_website, restaurant_openhours, restaurant_closehours, restaurant_id))
+            db.commit()
+            print("Restaurant details updated successfully")
+            return redirect(url_for('editrestaurant', restaurant=restaurant))
+        except MySQLdb.Error as e:
+            db.rollback()
+            print(f"An error occurred: {e}")
+            return render_template('editrestaurant.html', error="Failed to update restaurant details.")
+            
 @app.route('/edituser', methods=['GET', 'POST'])
 def edit_user():
     if request.method == 'POST':
