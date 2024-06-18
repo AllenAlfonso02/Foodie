@@ -35,7 +35,7 @@ class mySQLClass:
             self.connection.close()
 
 
-db = mySQLClass("localhost", "root", "septons")
+db = mySQLClass("localhost", "root", "0179849Aa$")
 db.connect()
 
 
@@ -48,7 +48,7 @@ def home():
 def signin():
     print("in here?")
     db.close()
-    db.change("root", "septons")
+    db.change("root", "0179849Aa$")
     db.connect()
     if (request.method == 'POST'):
 
@@ -117,6 +117,10 @@ def signin():
 
 @app.route('/signup', methods=['POST', 'GET'])
 def signup():
+
+    db.close()
+    db.change("root", "0179849Aa$")
+    db.connect()
 
     if request.method == 'POST':
         newUser = request.form['newUserNameOrEmail']
@@ -199,7 +203,7 @@ def addLiked():
                 INSERT INTO liked_restaurants (user_id, restaurant_id)
                 VALUES (%s, %s)
             """
-            cursor.execute(query, (user_id, restaurant_id))
+            db.cursor.execute(query, (user_id, restaurant_id))
             db.commit()
 
             return "Successfully added Restaurant"
@@ -216,9 +220,9 @@ def showMenu():
 
             currID = ""
 
-            cursor.execute('SELECT * FROM menu_items WHERE restaurant_id = ?', (currID,))
+            db.cursor.execute('SELECT * FROM menu_items WHERE restaurant_id = ?', (currID,))
 
-            rows = cursor.fetchall()
+            rows = db.cursor.fetchall()
 
         except:
             return render_template('userMenuView.html')
@@ -230,15 +234,15 @@ def showMenu():
 def addfooditem():
     if request.method == 'POST':
         # Retrieve form data
-        cursor.execute("SELECT CURRENT_USER()")
-        result = cursor.fetchone()
+        db.cursor.execute("SELECT CURRENT_USER()")
+        result = db.cursor.fetchone()
         # Parse the username (everything before '@')
         name = result.split('@')[0]
-        cursor.execute("SELECT id FROM login WHERE name = %s", (name,))
-        I = cursor.fetchone()
+        db.cursor.execute("SELECT id FROM login WHERE name = %s", (name,))
+        I = db.cursor.fetchone()
         # Fetch restaurant details from the database
-        cursor.execute("SELECT id FROM restaurants WHERE user_id = %s", (I,))
-        theid = cursor.fetchone()
+        db.cursor.execute("SELECT id FROM restaurants WHERE user_id = %s", (I,))
+        theid = db.cursor.fetchone()
         restaurant_id = theid
         food_name = request.form['food-name']
         food_description = request.form['food-description']
@@ -272,7 +276,7 @@ def edit_restaurant():
             I = db.cursor.fetchone()
             # Fetch restaurant details from the database
             db.cursor.execute("SELECT user_id FROM restaurants WHERE user_id = %s", (I,))
-            restaurant_id = cursor.fetchone()
+            restaurant_id = db.cursor.fetchone()
 
             # Fetch restaurant details using fetched restaurant_id
             db.cursor.execute("SELECT * FROM restaurants WHERE id = %s", (restaurant_id,))
