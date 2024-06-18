@@ -6,7 +6,6 @@ app = Flask(__name__)
 
 currentID = 0
 
-
 # Database connection parameters
 class mySQLClass:
     def __init__(self, host, user, password):
@@ -97,9 +96,6 @@ def signin():
                 db.connect()
 
                 print("Login successful 1")
-
-                print("Login successful 2")
-
 
                 return render_template('mainpage.html')
             else:
