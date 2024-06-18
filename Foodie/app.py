@@ -123,7 +123,16 @@ def addLiked():
 def addfooditem():
     if request.method == 'POST':
         # Retrieve form data
-        restaurant_id = request.form['restaurant_id'] 
+        cursor.execute("SELECT CURRENT_USER()")
+        result = cursor.fetchone()
+        # Parse the username (everything before '@')
+        name = result.split('@')[0]
+        cursor.execute("SELECT id FROM login WHERE name = %s", (name,))
+        I = cursor.fetchone()
+        # Fetch restaurant details from the database
+        cursor.execute("SELECT id FROM restaurants WHERE user_id = %s", (I,))
+        theid = cursor.fetchone()
+        restaurant_id = theid
         food_name = request.form['food-name']
         food_description = request.form['food-description']
         food_price = request.form['food-price']
@@ -152,10 +161,10 @@ def edit_restaurant():
             result = cursor.fetchone()
             # Parse the username (everything before '@')
             name = result.split('@')[0]
-            cursor.execute("SELECT user_id FROM login WHERE name = %s", (name,))
+            cursor.execute("SELECT id FROM login WHERE name = %s", (name,))
             I = cursor.fetchone()
             # Fetch restaurant details from the database
-            cursor.execute("SELECT * FROM restaurants WHERE id = %s", (I,))
+            cursor.execute("SELECT * FROM restaurants WHERE user_id = %s", (I,))
             restaurant = cursor.fetchone()
 
             return render_template('editrestaurant.html', restaurant=restaurant)
