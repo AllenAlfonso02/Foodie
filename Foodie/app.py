@@ -219,8 +219,8 @@ def edit_user():
         state = request.form['state']
         postal_code = request.form['postal_code']
         country = request.form['country']
-        
-        login_id = session['login_id']  # Example of getting login_id from session
+
+        login_id = ""
 
         cursor.execute("""
             UPDATE customer
@@ -230,13 +230,6 @@ def edit_user():
         
         db.commit()
         return redirect(url_for('mainpage'))  
-
-    elif request.method == 'GET':
-        login_id = session['login_id'] 
-        cursor.execute("SELECT * FROM customer WHERE login_id = %s", (login_id,))
-        customer_data = cursor.fetchone()
-        
-        return render_template('edituser.html', customer=customer_data, username=session['username'])
 
 if __name__ == '__main__':
     app.run(debug=True)
