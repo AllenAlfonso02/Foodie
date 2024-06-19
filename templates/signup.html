@@ -1,25 +1,89 @@
 <!doctype html>
 <html>
-    <body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - FOODIE</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            width: 300px;
+            text-align: center;
+        }
+        h1 {
+            color: #333333;
+            margin-bottom: 10px;
+        }
+        h2 {
+            color: #666666;
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="password"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #dddddd;
+            border-radius: 4px;
+        }
+        input[type="radio"] {
+            margin: 0 5px 0 0;
+        }
+        label {
+            margin-right: 10px;
+            color: #333333;
+        }
+        .radio-group {
+            margin: 20px 0;
+        }
+        input[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #007bff;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
         <h1>FOODIE</h1>
         <h2>Sign Up</h2>
-        <form action = "{{ url_for('signup') }}" method = "POST">
-            Email/Username:
-            <input type="text" name="newUserNameOrEmail">
-            <br>
-            Password:
-            <input type="text" name="newUserPassword">
-            <br>
-            <input type="radio" name="accountType" value="User">
-            User
-            <br>
-            <input type="radio" name="accountType" value="Establishment">
-            Establishment
-            <br>
-            <input type="submit" value="submit">
-            <br>
-            <br>
+        <form action="{{ url_for('signup') }}" method="POST">
+            <input type="text" name="newUserNameOrEmail" placeholder="Email/Username" required>
+            <input type="password" name="newUserPassword" placeholder="Password" required>
+            <div class="radio-group">
+                <label><input type="radio" name="accountType" value="User" required> User</label>
+                <label><input type="radio" name="accountType" value="Establishment" required> Establishment</label>
+            </div>
+            <input type="submit" value="Submit">
         </form>
-        <a href="/">Back to Menu</a>
-    </body>
+        <a class="back-link" href="/">Back to Menu</a>
+    </div>
+</body>
 </html>
