@@ -8,7 +8,7 @@ password = ""
 db = MySQLdb.connect(host=host, user=user, passwd=password)
 cursor = db.cursor()
 
-# cursor.execute("DROP DATABASE Foodie;")
+cursor.execute("DROP DATABASE Foodie;")
 # cursor.execute("GRANT ALL ON foodie.* TO 'root'@'localhost';")
 
 # Create a new database

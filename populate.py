@@ -14,9 +14,9 @@ cursor.execute('USE Foodie;')
 try:
     #LOGIN=======================
     print("Error in here? 1")
-    cursor.execute("""INSERT INTO LOGIN (id, name, password, type) VALUES (%s,%s,%s,%s);""", ("1","bmyers","123", "Establishment"))
-    cursor.execute("""INSERT INTO LOGIN (id, name, password, type) VALUES (%s,%s,%s,%s);""", ("2","jdoe","password", "User"))
-    cursor.execute("""INSERT INTO LOGIN (id, name, password, type) VALUES (%s,%s,%s,%s);""", ("3","ehkrabs","secretformula", "Establishment"))
+    cursor.execute("""INSERT INTO login (id, name, password, type) VALUES (%s,%s,%s,%s);""", ("1","bmyers","123", "Establishment"))
+    cursor.execute("""INSERT INTO login (id, name, password, type) VALUES (%s,%s,%s,%s);""", ("2","jdoe","password", "User"))
+    cursor.execute("""INSERT INTO login (id, name, password, type) VALUES (%s,%s,%s,%s);""", ("3","ehkrabs","secretformula", "Establishment"))
 
     #CUSTOMERS===================
     print("Error in here? 2")
