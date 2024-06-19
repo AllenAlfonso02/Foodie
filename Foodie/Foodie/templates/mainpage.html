@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foodie - Main Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 40px;
+            padding: 20px;
+        }
+        button {
+            outline: none;
+            border: none;
+            border-radius: 50%;
+            margin: 225px;
+            height: 70px;
+            width: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        button img {
+            object-fit: cover;
+        }
+        button:hover {
+            transform: scale(1.2);
+            filter: brightness(80%);
+        }
+        .sidediv {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 20%;
+            float: left;
+            height: 500px;
+        }
+        .centerdiv {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            width: 60%;
+            float: left;
+            margin: none;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 30px;
+        }
+        .centerdiv img {
+            align-self: center;
+            margin: 30px;
+            border-radius: 30px;
+            width: auto;
+            height: auto;
+            max-width: 800px;
+            max-height: 450px;
+        }
+        .back-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border-radius: 4px;
+            text-align: center;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body onload="loadInfo()">
+
+    <div class="sidediv">
+        <button class="button"> 
+            <img src="{{ url_for('static', filename='images/dislike-button-icon.webp') }}" alt="Dislike button" width="80px" height="80px" onclick="dislikeClicked()">
+        </button> a[]
+    </div>
+    <div class="centerdiv">
+        <div style="width:100%; display: flex; justify-content: center;">
+            <img id="r_Img" alt="Restaurant image">
+        </div>
+        <h2 id="r_Name"></h2>
+        <p id="r_Desc"></p>
+    </div>
+    <div class="sidediv">   
+        <button class="button">
+            <img src="{{ url_for('static', filename='images/like-button-icon.webp') }}" alt="Like button" width="80px" height="80px" onclick="likeClicked()">
+        </button>
+    </div>
+    <div style="clear: both; text-align: center; margin-top: 20px;">
+        <a href="/likedrestaurants" class="back-button">Liked Restaurants</a>
+    </div>
+    <script src="{{ url_for('static', filename='js/mainpage.js') }}"></script>
+</body>
+</html>
