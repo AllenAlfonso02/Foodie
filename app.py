@@ -5,7 +5,7 @@ import MySQLdb.cursors
 app = Flask(__name__)
 
 currentID = 0
-rootpswd = ''   #ENTER ROOT PASS HERE
+rootpswd = '0179849Aa$'   #ENTER ROOT PASS HERE
 
 # Database connection parameters
 class mySQLClass:
@@ -237,7 +237,7 @@ def addLiked():
             if not restaurant_id:
                 return "Failed to get restaurant ID"
 
-            db.execute("INSERT INTO liked_restaurants (user_id, restaurant_id) VALUES (%s, %s)", (user_id, restaurant_id))
+            db.cursor.execute("INSERT INTO liked_restaurants (user_id, restaurant_id) VALUES (%s, %s)", (user_id, restaurant_id))
             
             query = """
                 INSERT INTO liked_restaurants (user_id, restaurant_id)
