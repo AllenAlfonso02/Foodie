@@ -5,7 +5,7 @@ import MySQLdb.cursors
 app = Flask(__name__)
 
 currentID = 0
-rootpswd = ''   #ENTER ROOT PASS HERE
+rootpswd = '8675'   #ENTER ROOT PASS HERE
 
 # Database connection parameters
 class mySQLClass:
@@ -84,12 +84,10 @@ def signin():
                     db.cursor.execute("GRANT 'restaurant_user' TO %s@'localhost';", (user,))
                     print("Grants granted for establishment")
                     db.cursor.execute("SELECT id FROM login WHERE name = %s", (user, ))
-                    print('L')
                     pop = db.cursor.fetchone()
                     db.cursor.execute("INSERT INTO restaurants (user_id, name) VALUES (%s, %s)", (pop, user))
-                    print('L')
+                    #never happens because no commit, commit crashes the program?
                     db.cursor.execute("SELECT * FROM restaurants WHERE user_id = %s", (pop,))
-                    print("1")
                     restaurant = db.cursor.fetchone()
                     db.close()
                     db.change(user, passWrd)
@@ -283,20 +281,18 @@ def addfooditem():
         # Retrieve form data
         db.cursor.execute("SELECT CURRENT_USER()")
         result = db.cursor.fetchone()
-        print(result)
-        print("please")
+        #makes result able to be split
         results = ''.join(result)
+        #for some reason helped it actually recognize a string?
         resultss = results
         # Parse the username (everything before '@')
         name = resultss.split('@')[0]
-        print(name)
         db.cursor.execute("SELECT id FROM login WHERE name = %s", (name,))
         I = db.cursor.fetchone()
-        print(I[0])
-        #print(I[0])
         # Fetch restaurant details from the database
         db.cursor.execute("SELECT id FROM restaurants WHERE user_id = %s", (I,))
         theid = db.cursor.fetchone()
+        # where i found that restaurants never were created
         print(theid)
         restaurant_id = theid
         food_name = request.form['food-name']
@@ -311,6 +307,7 @@ def addfooditem():
             db.commit()
             print("Food item added successfully")
             return redirect(url_for('editrestaurant'))
+            #throws an error?
             #return render_template('addfooditem.html', message="Food item added successfully")
         except MySQLdb.Error as e:
             #db.rollback()
@@ -363,12 +360,12 @@ def editrestaurant():
             db.cursor.execute("SELECT user_id FROM restaurants WHERE user_id = %s", (I,))
             restaurant_id = db.cursor.fetchone()
 
-            # Assuming 'restaurant_id' is the correct identifier for your restaurant
+            # AAttempts to get the restaurant
             db.cursor.execute("SELECT * FROM restaurants WHERE id = %s", (restaurant_id,))
             restaurant = db.cursor.fetchone()
 
             if restaurant:
-                # Retrieve updated form data
+                # Retrieve new data
                 restaurant_title = request.form['restaurant-title']
                 restaurant_description = request.form['restaurant-description']
                 restaurant_address = request.form['restaurant-address']
