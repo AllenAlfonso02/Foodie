@@ -34,7 +34,7 @@ class mySQLClass:
             self.connection.close()
 
 
-db = mySQLClass("localhost", "root", "0179849Aa$")
+db = mySQLClass("localhost", "root", "[EveryGoodHorseEats99Carrots]")
 db.connect()
 
 
@@ -46,7 +46,7 @@ def home():
 def signin():
     print("in here?")
     db.close()
-    db.change("root", "0179849Aa$")
+    db.change("root", "[EveryGoodHorseEats99Carrots]")
     db.connect()
     if (request.method == 'POST'):
 
@@ -114,7 +114,7 @@ def signin():
 def signup():
 
     db.close()
-    db.change("root", "0179849Aa$")
+    db.change("root", "[EveryGoodHorseEats99Carrots]")
     db.connect()
 
     if request.method == 'POST':
@@ -226,7 +226,6 @@ def addLiked():
             restaurant_id = request.json.get('id')
             
             if not restaurant_id:
-                print('\Operation to add liked restaurant failed.\n')
                 return "Failed to get restaurant ID"
 
             db.execute("INSERT INTO liked_restaurants (user_id, restaurant_id) VALUES (%s, %s)", (user_id, restaurant_id))
