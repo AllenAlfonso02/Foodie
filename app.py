@@ -91,6 +91,9 @@ def signin():
                     db.cursor.execute("SELECT * FROM restaurants WHERE user_id = %s", (pop,))
                     print("1")
                     restaurant = db.cursor.fetchone()
+                    db.close()
+                    db.change(user, passWrd)
+                    db.connect()
                     return redirect(url_for('editrestaurant'))
                 else:
                     print("Unknown user type")

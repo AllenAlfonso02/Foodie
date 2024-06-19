@@ -3,7 +3,7 @@ import MySQLdb
 # Database connection parameters
 host = "localhost"
 user = "root"
-password = "septons"
+password = "0179849Aa$"
 
 db = MySQLdb.connect(host=host, user=user, passwd=password)
 cursor = db.cursor()
