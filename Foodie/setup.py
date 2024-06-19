@@ -3,10 +3,13 @@ import MySQLdb
 # Database connection parameters
 host = "localhost"
 user = "root"
-password = ""
+password = "8675"
 
 db = MySQLdb.connect(host=host, user=user, passwd=password)
 cursor = db.cursor()
+
+cursor.execute("DROP DATABASE Foodie;")
+cursor.execute("GRANT ALL ON foodie.* TO 'root'@'localhost';")
 
 # Create a new database
 cursor.execute("CREATE DATABASE IF NOT EXISTS Foodie;")
@@ -31,12 +34,12 @@ cursor.execute("""
         id INT AUTO_INCREMENT PRIMARY KEY,
         user_id INT NOT NULL,
         name VARCHAR(255) NOT NULL,
-        estaburl VARCHAR(255), 
-        address VARCHAR(255) NOT NULL,
-        city VARCHAR(100) NOT NULL,
-        state VARCHAR(100) NOT NULL,
+        estabImg VARCHAR(255), 
+        address VARCHAR(255),
+        city VARCHAR(100),
+        state VARCHAR(100),
         postal_code VARCHAR(20),
-        country VARCHAR(100) NOT NULL,
+        country VARCHAR(100),
         phone_number VARCHAR(20),
         website VARCHAR(255),
         cuisine_type VARCHAR(100),
@@ -47,21 +50,20 @@ cursor.execute("""
 );
 """)
 print("Table 'restaurants' created successfully.")
-
+# changed so there is foreign key and no need for username and password in this table as that information is covered the login info
 cursor.execute("""
-CREATE TABLE IF NOT EXISTS customer (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    first_name VARCHAR(100),
-    last_name VARCHAR(100),
-    phone_number VARCHAR(20),
-    city VARCHAR(100) NOT NULL,
-    state VARCHAR(100) NOT NULL,
-    postal_code VARCHAR(20),
-    country VARCHAR(100) NOT NULL
-);
+    CREATE TABLE IF NOT EXISTS customer (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        login_id INT UNIQUE NOT NULL,
+        first_name VARCHAR(100),
+        last_name VARCHAR(100),
+        phone_number VARCHAR(20),
+        city VARCHAR(100) NOT NULL,
+        state VARCHAR(100) NOT NULL,
+        postal_code VARCHAR(20),
+        country VARCHAR(100) NOT NULL,
+        FOREIGN KEY (login_id) REFERENCES login(id) ON DELETE CASCADE
+    );
 """)
 print("Table 'customer' created successfully.")
 
@@ -80,14 +82,22 @@ CREATE TABLE if NOT EXISTS  menu_items (
 """)
 print("Table 'menu_items' created successfully.")
 
-cursor.execute("CREATE ROLE IF NOT EXISTS 'Establishment'")
-cursor.execute("CREATE ROLE IF NOT EXISTS 'Restaurant_user'")
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS liked_restaurants (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    restaurant_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES customer(id),
+    FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
+);
+""")
+print("Table 'liked_restaurants' created successfully.")
 
-cursor.execute("CREATE ROLE IF NOT EXISTS 'customer_user'")
-cursor.execute("CREATE ROLE IF NOT EXISTS 'restaurant_user'")
-cursor.execute("CREATE ROLE IF NOT EXISTS 'admin'")
+cursor.execute("CREATE ROLE IF NOT EXISTS 'customer_user';")
+cursor.execute("CREATE ROLE IF NOT EXISTS 'restaurant_user';")
 
 roles_command = [
+    "GRANT SELECT ON Foodie.login to 'restaurant_user';",
     "GRANT SELECT ON Foodie.restaurants TO 'customer_user';",
     "GRANT SELECT ON Foodie.menu_items TO 'customer_user';",
     "GRANT SELECT, INSERT, UPDATE ON Foodie.customer TO 'customer_user';",
@@ -98,8 +108,12 @@ roles_command = [
 for command in roles_command:
     cursor.execute(command)
 
-cursor.execute("SET ROLE ALL;")
-#cursor.execute("SET ROLE 'customer_user';")
-#cursor.execute("SET ROLE 'restaurant_user';")
+
+
+cursor.execute("SELECT CURRENT_ROLE();")
+current_role = cursor.fetchone()[0]
+cursor.execute("SET GLOBAL activate_all_roles_on_login = true;")
+
+print(f"Current role for the connection: {current_role}")
 
 print("Roles set up")
