@@ -35,11 +35,11 @@ cursor.execute("""
         user_id INT NOT NULL,
         name VARCHAR(255) NOT NULL,
         estabImg VARCHAR(255), 
-        address VARCHAR(255),
-        city VARCHAR(100),
-        state VARCHAR(100),
+        address VARCHAR(255) NOT NULL,
+        city VARCHAR(100) NOT NULL,
+        state VARCHAR(100) NOT NULL,
         postal_code VARCHAR(20),
-        country VARCHAR(100),
+        country VARCHAR(100) NOT NULL,
         phone_number VARCHAR(20),
         website VARCHAR(255),
         cuisine_type VARCHAR(100),
@@ -97,7 +97,6 @@ cursor.execute("CREATE ROLE IF NOT EXISTS 'customer_user';")
 cursor.execute("CREATE ROLE IF NOT EXISTS 'restaurant_user';")
 
 roles_command = [
-    "GRANT SELECT ON Foodie.login to 'restaurant_user';",
     "GRANT SELECT ON Foodie.restaurants TO 'customer_user';",
     "GRANT SELECT ON Foodie.menu_items TO 'customer_user';",
     "GRANT SELECT, INSERT, UPDATE ON Foodie.customer TO 'customer_user';",
