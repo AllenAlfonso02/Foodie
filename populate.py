@@ -2,7 +2,7 @@ import MySQLdb
 
 host = "localhost"
 user = "root"
-password = ""
+password = "0179849Aa$"
 
 db = MySQLdb.connect(host=host, user=user, passwd=password)
 cursor = db.cursor()
@@ -13,13 +13,13 @@ cursor.execute('USE Foodie;')
 # Adding dummy data
 try:
     #LOGIN=======================
-    
-    cursor.execute("""INSERT INTO login (id, name, password, type) VALUES (%s,%s,%s,%s);""", ("1","bmyers","123", "Establishment"))
-    cursor.execute("""INSERT INTO login (id, name, password, type) VALUES (%s,%s,%s,%s);""", ("2","jdoe","password", "User"))
-    cursor.execute("""INSERT INTO login (id, name, password, type) VALUES (%s,%s,%s,%s);""", ("3","ehkrabs","secretformula", "Establishment"))
+    print("Error in here? 1")
+    cursor.execute("""INSERT INTO LOGIN (id, name, password, type) VALUES (%s,%s,%s,%s);""", ("1","bmyers","123", "Establishment"))
+    cursor.execute("""INSERT INTO LOGIN (id, name, password, type) VALUES (%s,%s,%s,%s);""", ("2","jdoe","password", "User"))
+    cursor.execute("""INSERT INTO LOGIN (id, name, password, type) VALUES (%s,%s,%s,%s);""", ("3","ehkrabs","secretformula", "Establishment"))
 
     #CUSTOMERS===================
-    
+    print("Error in here? 2")
     cursor.execute("""INSERT INTO customer (id, login_id, first_name, last_name, phone_number, city, state, postal_code, country) 
                 VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s);""", 
                 ("1", "1", "Bob", "Myers", "(800) 123-4567", "Tallahassee", "FL", "32304", "United States"))
@@ -33,7 +33,7 @@ try:
                 ("3", "3", "Mr", "Krabs", "(999) 123-4567", "Bikini Bottom", "FL", "32316", "United States"))
 
     #RESTAURANTS==================
-    
+    print("Error in here? 3")
     target_username = '1'
     cursor.execute("SELECT id FROM customer WHERE id=%s", (target_username,))
     target_id = cursor.fetchone()
@@ -60,7 +60,7 @@ try:
                 (target_id, "Krusty Krab", "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/The_Krusty_Krab.png/1167px-The_Krusty_Krab.png?20231003021001", "831 Bottom Feeder Lane", "Bikini Bottom", "FL", "32315", "United States", "(123)456-7890", "https://spongebob.fandom.com/wiki/Krusty_Krab", "American", "$10-$20", "10:00", "22:00"))
 
     #MENU_ITEMS=======================
-    
+    print("Error in here? 4")
     cursor.execute("INSERT INTO menu_items (restaurant_id, name, foodurl, description, price) VALUES (%s,%s,%s,%s,%s);",
                    ('1', "FoodItem", "https", "words words words", 10.99))
     cursor.execute("INSERT INTO menu_items (restaurant_id, name, foodurl, description, price) VALUES (%s,%s,%s,%s,%s);",
@@ -69,7 +69,7 @@ try:
                    ('1', "FoodItem3", "https", "words words words words words", 12.99))    
     
     #LIKED_RESTAURANTS================
-    
+    print("Error in here? 5")
     cursor.execute('SELECT id FROM restaurants WHERE name=\'Chipotle Mexican Grill\'')
     rest_id = cursor.fetchone()
 

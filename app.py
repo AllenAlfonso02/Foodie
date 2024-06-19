@@ -252,21 +252,27 @@ def addLiked():
 
 @app.route('/userMenuView', methods=['POST', 'GET'])
 def showMenu():
-    if (request.method == 'GET'):
-        try:
-            db.row_factory = MySQLdb.Row
 
-            currID = ""
+    try:
+        print("Error here? 1")
+        currID = 1
+        print("Error here? 2")
+        db.cursor.execute('SELECT id, name, description, price FROM menu_items WHERE restaurant_id = %s', (currID,))
+        print("Error here? 3")
+        rows = db.cursor.fetchall()
+        
+        for row in rows:
+            for part in row:
+                print(part)
+        
+        print("About to display info!")
+        return render_template('userMenuView.html', rows = rows)
 
-            db.cursor.execute('SELECT * FROM menu_items WHERE restaurant_id = ?', (currID,))
+    except MySQLdb.Error as e:
+        print(f"An error occurred: {e}")
+        return render_template('userMenuView.html')
 
-            rows = db.cursor.fetchall()
 
-        except:
-            return render_template('userMenuView.html')
-
-    else:
-        return render_template('startingPage.html')
 
 @app.route('/addfooditem', methods=['GET', 'POST'])
 def addfooditem():
