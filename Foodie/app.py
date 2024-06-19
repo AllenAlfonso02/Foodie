@@ -40,7 +40,7 @@ db.connect()
 
 @app.route('/')
 def home():
-    return render_template('mainpage.html')
+    return render_template('startingPage.html')
 
 @app.route('/signin', methods=['POST', 'GET'])
 def signin():
