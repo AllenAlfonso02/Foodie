@@ -73,9 +73,15 @@ def signin():
                 elif result[0] == "Establishment":
                     cursor.execute("GRANT 'restaurant_user' TO %s@'localhost';", (user,))
                     print("Grants granted for establishment")
-                    cursor.execute("SELECT * FROM restaurants WHERE id = %s", (user,))
+                    cursor.execute("SELECT id FROM login WHERE name = %s", (user, ))
+                    print('L')
+                    pop = cursor.fetchone()
+                    cursor.execute("INSERT INTO restaurants (user_id, name) VALUES (%s, %s)", (pop, user))
+                    print('L')
+                    cursor.execute("SELECT * FROM restaurants WHERE user_id = %s", (pop,))
                     print("1")
                     restaurant = cursor.fetchone()
+                    return redirect(url_for('editrestaurant'))
                     return render_template('editrestaurant.html', restaurant=restaurant)
                 else:
                     print("Unknown user type")
@@ -215,19 +221,27 @@ def showMenu():
     else:
         return render_template('startingPage.html')
 
-@app.route('/addfooditem', methods=['POST'])
+@app.route('/addfooditem', methods=['GET', 'POST'])
 def addfooditem():
     if request.method == 'POST':
         # Retrieve form data
         cursor.execute("SELECT CURRENT_USER()")
         result = cursor.fetchone()
+        print(result)
+        print("please")
+        results = ''.join(result)
+        resultss = results
         # Parse the username (everything before '@')
-        name = result.split('@')[0]
+        name = resultss.split('@')[0]
+        print(name)
         cursor.execute("SELECT id FROM login WHERE name = %s", (name,))
         I = cursor.fetchone()
+        print(I[0])
+        #print(I[0])
         # Fetch restaurant details from the database
         cursor.execute("SELECT id FROM restaurants WHERE user_id = %s", (I,))
         theid = cursor.fetchone()
+        print(theid)
         restaurant_id = theid
         food_name = request.form['food-name']
         food_description = request.form['food-description']
@@ -236,27 +250,29 @@ def addfooditem():
 
         try:
             # Insert food item into menu_items table
-            cursor.execute("""
-                INSERT INTO menu_items (restaurant_id, name, foodurl, description, price)
-                VALUES (%s, %s, %s, %s, %s)
-            """, (restaurant_id, food_name, food_url, food_description, food_price))
+            cursor.execute("INSERT INTO menu_items (restaurant_id, name, foodurl, description, price)VALUES (%s, %s, %s, %s, %s)", 
+                           (restaurant_id, food_name, food_url, food_description, food_price))
             db.commit()
             print("Food item added successfully")
-            return render_template('addfooditem.html', message="Food item added successfully")
+            return redirect(url_for('editrestaurant'))
+            #return render_template('addfooditem.html', message="Food item added successfully")
         except MySQLdb.Error as e:
-            db.rollback()
+            #db.rollback()
             print(f"An error occurred: {e}")
-            return render_template('addfooditem.html', error="Failed to add food item. Please try again.")
+            return redirect(url_for('editrestaurant'))
+            #return render_template('addfooditem.html', error="Failed to add food item. Please try again.")
     return render_template('addfooditem.html')
 
 @app.route('/editrestaurant', methods=['GET', 'POST'])
-def edit_restaurant():
+def editrestaurant():
     if request.method == 'GET':
         try:
             cursor.execute("SELECT CURRENT_USER()")
             result = cursor.fetchone()
+            results = ' '.join(str(item) for item in result)
+            resultss = results
             # Parse the username (everything before '@')
-            name = result.split('@')[0]
+            name = resultss.split('@')[0]
             cursor.execute("SELECT id FROM login WHERE name = %s", (name,))
             I = cursor.fetchone()
             # Fetch restaurant details from the database
@@ -266,11 +282,11 @@ def edit_restaurant():
             # Fetch restaurant details using fetched restaurant_id
             cursor.execute("SELECT * FROM restaurants WHERE id = %s", (restaurant_id,))
             restaurant = cursor.fetchone()
-
-            if restaurant:
+            current_url = request.path
+            if current_url == '/editrestaurant':
                 return render_template('editrestaurant.html', restaurant=restaurant)
-            else:
-                return render_template('editrestaurant.html', error="Restaurant not found.")
+            else: 
+                return redirect(url_for('editrestaurant'))
             
         except MySQLdb.Error as e:
             print(f"An error occurred: {e}")
@@ -281,8 +297,10 @@ def edit_restaurant():
         try:
             cursor.execute("SELECT CURRENT_USER()")
             result = cursor.fetchone()
+            results = ''.join(result)
+            resultss = results
             # Parse the username (everything before '@')
-            name = result.split('@')[0]
+            name = resultss.split('@')[0]
             cursor.execute("SELECT id FROM login WHERE name = %s", (name,))
             I = cursor.fetchone()
             # Fetch restaurant details from the database
@@ -330,4 +348,3 @@ def edit_restaurant():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
