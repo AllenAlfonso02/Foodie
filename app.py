@@ -5,6 +5,7 @@ import MySQLdb.cursors
 app = Flask(__name__)
 
 currentID = 0
+rootpswd = ''   #ENTER ROOT PASS HERE
 
 # Database connection parameters
 class mySQLClass:
@@ -34,7 +35,7 @@ class mySQLClass:
             self.connection.close()
 
 
-db = mySQLClass("localhost", "root", "[EveryGoodHorseEats99Carrots]")
+db = mySQLClass("localhost", "root", rootpswd)
 db.connect()
 
 
@@ -46,7 +47,7 @@ def home():
 def signin():
     print("in here?")
     db.close()
-    db.change("root", "[EveryGoodHorseEats99Carrots]")
+    db.change("root", rootpswd)
     db.connect()
     if (request.method == 'POST'):
 
@@ -119,7 +120,7 @@ def signin():
 def signup():
 
     db.close()
-    db.change("root", "[EveryGoodHorseEats99Carrots]")
+    db.change("root", rootpswd)
     db.connect()
 
     if request.method == 'POST':

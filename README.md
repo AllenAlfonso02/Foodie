@@ -16,7 +16,7 @@ python modules:
 2. Install dependencies
 > pip install Flask mysqlclient
 3. Enter your mysql root 
-password in `setup.py` , `app.py` , `setup.py`
+password in `setup.py` , `app.py` , `populate.py`
 4. Run the setup file:
 > python3 setup.py
 5. To test with sample data (optional):
