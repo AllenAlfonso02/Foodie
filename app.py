@@ -5,7 +5,7 @@ import MySQLdb.cursors
 app = Flask(__name__)
 
 currentID = 0
-rootpswd = '0179849Aa$'   #ENTER ROOT PASS HERE
+rootpswd = ''   #ENTER ROOT PASS HERE
 
 # Database connection parameters
 class mySQLClass:
