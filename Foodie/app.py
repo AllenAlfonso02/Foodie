@@ -6,7 +6,6 @@ app = Flask(__name__)
 
 currentID = 0
 
-
 # Database connection parameters
 class mySQLClass:
     def __init__(self, host, user, password):
@@ -14,31 +13,41 @@ class mySQLClass:
         self.user = user
         self.password = password
         self.database = "Foodie"
+        self.cursor = None
+        self.connection = None
 
     def connect(self):
         self.connection = MySQLdb.connect(
             host=self.host, user=self.user, password=self.password, database=self.database
         )
+        self.cursor = self.connection.cursor()
         return self.connection
 
     def change(self, user, password):
         self.user = user
         self.password = password
 
+    def close(self):
+        if self.cursor:
+            self.cursor.close()
+        if self.connection:
+            self.connection.close()
 
-db = mySQLClass("localhost", "abab", "8675")
-newDB = db.connect()
-cursor = newDB.cursor()
+
+db = mySQLClass("localhost", "root", "8675")
+db.connect()
 
 
 @app.route('/')
 def home():
     return render_template('startingPage.html')
 
-
 @app.route('/signin', methods=['POST', 'GET'])
 def signin():
     print("in here?")
+    db.close()
+    db.change("root", "8675")
+    db.connect()
     if (request.method == 'POST'):
 
         user = request.form['userNameOrEmail']
@@ -49,54 +58,56 @@ def signin():
 
         try:
 
-            cursor.execute("SELECT * FROM login WHERE EXISTS (SELECT * FROM login WHERE name = %s AND password = %s)",
+            db.cursor.execute("SELECT * FROM login WHERE EXISTS (SELECT * FROM login WHERE name = %s AND password = %s)",
                            (user, passWrd))
-            result = cursor.fetchone()
+            result = db.cursor.fetchone()
 
             if result:
                 "Shows the grants for each user"
                 show_grants_query = "SHOW GRANTS FOR %s@'localhost'"
-                cursor.execute(show_grants_query, (user,))
-                privileges = cursor.fetchall()
+                db.cursor.execute(show_grants_query, (user,))
+                privileges = db.cursor.fetchall()
 
                 for privilege in privileges:
                     print(privilege)
                     "manually input the privileges  "
 
                 #TESTING HERE
-                cursor.execute("SELECT type FROM login WHERE name = %s", (user,))
-                result = cursor.fetchone()
+                db.cursor.execute("SELECT type FROM login WHERE name = %s", (user,))
+                result = db.cursor.fetchone()
 
                 if result[0] == "User":
-                    cursor.execute("GRANT 'customer_user' TO %s@'localhost';", (user,))
+                    db.cursor.execute("GRANT 'customer_user' TO %s@'localhost';", (user,))
                     print("Grants granted for user")
                 elif result[0] == "Establishment":
-                    cursor.execute("GRANT 'restaurant_user' TO %s@'localhost';", (user,))
+                    db.cursor.execute("GRANT 'restaurant_user' TO %s@'localhost';", (user,))
                     print("Grants granted for establishment")
-                    cursor.execute("SELECT id FROM login WHERE name = %s", (user, ))
+                    db.cursor.execute("SELECT id FROM login WHERE name = %s", (user, ))
                     print('L')
-                    pop = cursor.fetchone()
-                    cursor.execute("INSERT INTO restaurants (user_id, name) VALUES (%s, %s)", (pop, user))
+                    pop = db.cursor.fetchone()
+                    db.cursor.execute("""INSERT INTO restaurants (user_id, name, estabImg, address, city, state, postal_code, country, phone_number, website, cuisine_type, price_range, opening_hours, closing_hours) 
+                                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);""", 
+                                    (pop, user, " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "))
                     print('L')
-                    cursor.execute("SELECT * FROM restaurants WHERE user_id = %s", (pop,))
+                    db.commit()
+                    db.cursor.execute("SELECT * FROM restaurants WHERE user_id = %s", (pop,))
                     print("1")
-                    restaurant = cursor.fetchone()
+                    restaurant = db.cursor.fetchone()
+                    db.close()
+                    db.change(user, passWrd)
+                    db.connect()
                     return redirect(url_for('editrestaurant'))
-                    return render_template('editrestaurant.html', restaurant=restaurant)
                 else:
                     print("Unknown user type")
-                cursor.execute("FLUSH PRIVILEGES;")
+                db.cursor.execute("FLUSH PRIVILEGES;")
                 "Connects the login user to the database"
                 print("Login successful 0")
-
+                db.close()
                 db.change(user, passWrd)
-                newDB = db.connect()
-                newCursor = newDB.cursor
+                db.connect()
+
                 print("Login successful 1")
 
-                print("Login successful 2")
-
-                cursor.close()
                 return render_template('mainpage.html')
             else:
                 print("Invalid username or password")
@@ -113,6 +124,10 @@ def signin():
 @app.route('/signup', methods=['POST', 'GET'])
 def signup():
 
+    db.close()
+    db.change("root", "8675")
+    db.connect()
+
     if request.method == 'POST':
         newUser = request.form['newUserNameOrEmail']
         passWrd = request.form['newUserPassword']
@@ -122,30 +137,35 @@ def signup():
         print(passWrd)
         print(accType)
         try:
-            cursor.execute("SELECT * FROM login WHERE EXISTS (SELECT * FROM login WHERE name = %s)", (newUser,))
-            result = cursor.fetchone()
+            db.cursor.execute("SELECT * FROM login WHERE EXISTS (SELECT * FROM login WHERE name = %s)", (newUser,))
+            result = db.cursor.fetchone()
             if result:
                 print("Username already exists")
                 return render_template('signup.html')
             else:
                 create_user_query = "CREATE USER IF NOT EXISTS %s@'localhost' IDENTIFIED BY %s;"
-                cursor.execute(create_user_query, (newUser, passWrd))
+                db.cursor.execute(create_user_query, (newUser, passWrd))
                 grant_user_query = "GRANT 'customer_user' TO %s@'localhost';"
-                cursor.execute("FLUSH PRIVILEGES;")
+                db.cursor.execute("FLUSH PRIVILEGES;")
                 grant_restaurant_query = "GRANT 'restaurant_user' TO %s@'localhost';"
 
-                cursor.execute("INSERT INTO login (name, password, type) VALUES (%s, %s, %s)",
+                db.cursor.execute("INSERT INTO login (name, password, type) VALUES (%s, %s, %s)",
                                (newUser, passWrd, accType))
 
                 if accType == "User":
-                    cursor.execute(grant_user_query, (newUser,))
-                    cursor.execute("FLUSH PRIVILEGES;")
-                    cursor.execute("SET ROLE 'customer_user'")
+                    db.cursor.execute(grant_user_query, (newUser,))
+                    db.cursor.execute("FLUSH PRIVILEGES;")
+                    db.cursor.execute("SET ROLE 'customer_user'")
 
                 else:
-                    cursor.execute(grant_restaurant_query, (newUser,))
-                    cursor.execute("FLUSH PRIVILEGES;")
-                    cursor.execute("SET ROLE 'restaurant_user'")
+                    db.cursor.execute(grant_restaurant_query, (newUser,))
+                    db.cursor.execute("FLUSH PRIVILEGES;")
+                    db.cursor.execute("SET ROLE 'restaurant_user'")
+                    db.cursor.execute("SELECT id FROM login WHERE name = %s", (newUser, ))
+                    print('L')
+                    pop = db.cursor.fetchone()
+                    db.cursor.execute("INSERT INTO restaurants (name, user_id) VALUES = (%s,%s,)", 
+                                      (newUser, pop))
 
             # Add the new user to the database session
 
@@ -170,63 +190,107 @@ def mainpage():
 
 @app.route('/loadNext')
 def loadNext():
-    #select statement
-    global currentID;
-    currentID += 1
-    testjson = {"picture": "https://www.connarchitects.com/wp-content/uploads/2019/09/CONN_Edison-2.jpg",
-                "name": "Dummy Restaurant",
-                "description": "This is a json created to test my restaurant.fdhfkjsdhfjdshfkhdskfhkjfsdhjdfhksfhjkhsfkdhfds",
+    global currentID
+    default = ['Not available', '', '', '']
+    valid = False
+    userID = 1
+
+    db.cursor.execute("SELECT MAX(id) FROM restaurants")
+    maxID = db.cursor.fetchone()[0]
+    print(f'The largest ID was {maxID}')
+    i = 0
+    try:
+        while not valid and i < 50:
+                if currentID <= maxID:  
+                    print(f'i = {i}')
+                    i += 1
+                    print(f'\nCurrentID = {currentID}\n')
+                    
+                    db.cursor.execute("""SELECT name, cuisine_type, estabImg, restaurants.id FROM restaurants  LEFT JOIN liked_restaurants lr ON restaurants.id = lr.restaurant_id AND lr.user_id = %s WHERE restaurants.id = %s AND lr.restaurant_id IS NULL """, (userID, currentID))
+                    
+                    restaurant = db.cursor.fetchone()
+                    currentID += 1
+
+                    if restaurant is not None:
+                        valid = True
+
+                        for r in restaurant:
+                            print(r)
+                else:
+                    currentID = 0
+
+        restjson = {'name': restaurant[0],
+                'cuisine_type': restaurant[1],
+                'estabImg' : restaurant[2],
+                'id' : restaurant[3]
                 }
-    return jsonify(testjson)
+    except Exception as e:
+            print(e)
+            restjson = {'name': default[0],
+                        'cuisine_type': default[1],
+                        'estabImg' : default[2],
+                        'id' : default[3]
+                        }
+    
+    return jsonify(restjson)
 
-
-@app.route('/addClicked', methods=['POST'])
+@app.route('/addClicked', methods = ['POST','GET'])
 def addLiked():
     if request.method == 'POST':
         try:
-            user_id = 1  # Replace with the actual user ID from session or request
-            restaurant_id = request.json.get('restaurant_id')
-
+            user_id = 2  # Replace with the actual user ID from session or request
+            restaurant_id = request.json.get('id')
+            
             if not restaurant_id:
+                print('\Operation to add liked restaurant failed.\n')
                 return "Failed to get restaurant ID"
 
+            db.execute("INSERT INTO liked_restaurants (user_id, restaurant_id) VALUES (%s, %s)", (user_id, restaurant_id))
+            
             query = """
                 INSERT INTO liked_restaurants (user_id, restaurant_id)
                 VALUES (%s, %s)
             """
-            cursor.execute(query, (user_id, restaurant_id))
+            db.cursor.execute(query, (user_id, restaurant_id))
+            
             db.commit()
 
-            return "Successfully added Restaurant"
         except MySQLdb.Error as e:
             db.rollback()
-            return "Unsuccessful insert operation"
+            return 'operation unsuccessful'
+        return 'operation succeeded'
 
 
 @app.route('/userMenuView', methods=['POST', 'GET'])
 def showMenu():
-    if (request.method == 'GET'):
-        try:
-            db.row_factory = MySQLdb.Row
 
-            currID = ""
+    try:
+        print("Error here? 1")
+        currID = 1
+        print("Error here? 2")
+        db.cursor.execute('SELECT id, name, description, price FROM menu_items WHERE restaurant_id = %s', (currID,))
+        print("Error here? 3")
+        rows = db.cursor.fetchall()
+        
+        for row in rows:
+            for part in row:
+                print(part)
+        
+        print("About to display info!")
+        return render_template('userMenuView.html', rows = rows)
 
-            cursor.execute('SELECT * FROM menu_items WHERE restaurant_id = ?', (currID,))
+    except MySQLdb.Error as e:
+        print(f"An error occurred: {e}")
+        return render_template('userMenuView.html')
 
-            rows = cursor.fetchall()
 
-        except:
-            return render_template('userMenuView.html')
-
-    else:
-        return render_template('startingPage.html')
 
 @app.route('/addfooditem', methods=['GET', 'POST'])
 def addfooditem():
     if request.method == 'POST':
         # Retrieve form data
-        cursor.execute("SELECT CURRENT_USER()")
-        result = cursor.fetchone()
+        db.cursor.execute("SELECT CURRENT_USER()")
+        result = db.cursor.fetchone()
         print(result)
         print("please")
         results = ''.join(result)
@@ -234,13 +298,13 @@ def addfooditem():
         # Parse the username (everything before '@')
         name = resultss.split('@')[0]
         print(name)
-        cursor.execute("SELECT id FROM login WHERE name = %s", (name,))
-        I = cursor.fetchone()
-        print(I[0])
+        db.cursor.execute("SELECT id FROM login WHERE name = %s", (name,))
+        I = db.cursor.fetchone()
+        print(I)
         #print(I[0])
         # Fetch restaurant details from the database
-        cursor.execute("SELECT id FROM restaurants WHERE user_id = %s", (I,))
-        theid = cursor.fetchone()
+        db.cursor.execute("SELECT id FROM restaurants WHERE name = %s", (name,))
+        theid = db.cursor.fetchone()
         print(theid)
         restaurant_id = theid
         food_name = request.form['food-name']
@@ -250,7 +314,7 @@ def addfooditem():
 
         try:
             # Insert food item into menu_items table
-            cursor.execute("INSERT INTO menu_items (restaurant_id, name, foodurl, description, price)VALUES (%s, %s, %s, %s, %s)", 
+            db.cursor.execute("INSERT INTO menu_items (restaurant_id, name, foodurl, description, price)VALUES (%s, %s, %s, %s, %s)", 
                            (restaurant_id, food_name, food_url, food_description, food_price))
             db.commit()
             print("Food item added successfully")
@@ -267,21 +331,21 @@ def addfooditem():
 def editrestaurant():
     if request.method == 'GET':
         try:
-            cursor.execute("SELECT CURRENT_USER()")
-            result = cursor.fetchone()
+            db.cursor.execute("SELECT CURRENT_USER()")
+            result = db.cursor.fetchone()
             results = ' '.join(str(item) for item in result)
             resultss = results
             # Parse the username (everything before '@')
             name = resultss.split('@')[0]
-            cursor.execute("SELECT id FROM login WHERE name = %s", (name,))
-            I = cursor.fetchone()
+            db.cursor.execute("SELECT id FROM login WHERE name = %s", (name,))
+            I = db.cursor.fetchone()
             # Fetch restaurant details from the database
-            cursor.execute("SELECT user_id FROM restaurants WHERE user_id = %s", (I,))
-            restaurant_id = cursor.fetchone()
+            db.cursor.execute("SELECT user_id FROM restaurants WHERE user_id = %s", (I,))
+            restaurant_id = db.cursor.fetchone()
 
             # Fetch restaurant details using fetched restaurant_id
-            cursor.execute("SELECT * FROM restaurants WHERE id = %s", (restaurant_id,))
-            restaurant = cursor.fetchone()
+            db.cursor.execute("SELECT * FROM restaurants WHERE id = %s", (restaurant_id,))
+            restaurant = db.cursor.fetchone()
             current_url = request.path
             if current_url == '/editrestaurant':
                 return render_template('editrestaurant.html', restaurant=restaurant)
@@ -295,21 +359,21 @@ def editrestaurant():
     elif request.method == 'POST':
         # Similar to GET method, fetch and update restaurant details
         try:
-            cursor.execute("SELECT CURRENT_USER()")
-            result = cursor.fetchone()
+            db.cursor.execute("SELECT CURRENT_USER()")
+            result = db.cursor.fetchone()
             results = ''.join(result)
             resultss = results
             # Parse the username (everything before '@')
             name = resultss.split('@')[0]
-            cursor.execute("SELECT id FROM login WHERE name = %s", (name,))
-            I = cursor.fetchone()
+            db.cursor.execute("SELECT id FROM login WHERE name = %s", (name,))
+            I = db.cursor.fetchone()
             # Fetch restaurant details from the database
-            cursor.execute("SELECT user_id FROM restaurants WHERE user_id = %s", (I,))
-            restaurant_id = cursor.fetchone()
+            db.cursor.execute("SELECT user_id FROM restaurants WHERE user_id = %s", (I,))
+            restaurant_id = db.cursor.fetchone()
 
             # Assuming 'restaurant_id' is the correct identifier for your restaurant
-            cursor.execute("SELECT * FROM restaurants WHERE id = %s", (restaurant_id,))
-            restaurant = cursor.fetchone()
+            db.cursor.execute("SELECT * FROM restaurants WHERE id = %s", (restaurant_id,))
+            restaurant = db.cursor.fetchone()
 
             if restaurant:
                 # Retrieve updated form data
@@ -326,7 +390,7 @@ def editrestaurant():
                 restaurant_closehours = request.form['restaurant-closehours']
 
                 # Update restaurant details in the database
-                cursor.execute("""
+                db.cursor.execute("""
                     UPDATE restaurants 
                     SET name = %s, description = %s, address = %s, state = %s, city = %s, postal_code = %s,
                         country = %s, phone_number = %s, website = %s, opening_hours = %s, closing_hours = %s
@@ -344,7 +408,28 @@ def editrestaurant():
             db.rollback()
             print(f"An error occurred: {e}")
             return render_template('editrestaurant.html', error="Failed to update restaurant details.")
+            
+@app.route('/edituser', methods=['GET', 'POST'])
+def edit_user():
+    if request.method == 'POST':
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
+        phone_number = request.form['phone_number']
+        city = request.form['city']
+        state = request.form['state']
+        postal_code = request.form['postal_code']
+        country = request.form['country']
 
+        login_id = ""
+
+        db.cursor.execute("""
+            UPDATE customer
+            SET first_name=%s, last_name=%s, phone_number=%s, city=%s, state=%s, postal_code=%s, country=%s
+            WHERE login_id=%s
+        """, (first_name, last_name, phone_number, city, state, postal_code, country, login_id))
+        
+        db.commit()
+        return redirect(url_for('mainpage'))  
 
 if __name__ == '__main__':
     app.run(debug=True)
