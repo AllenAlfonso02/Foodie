@@ -257,7 +257,7 @@ def showMenu():
         print("Error here? 1")
         currID = 1
         print("Error here? 2")
-        db.cursor.execute('SELECT id, foodurl, name, description, price FROM menu_items WHERE restaurant_id = %s', (currID,))
+        db.cursor.execute('SELECT id, name, description, price FROM menu_items WHERE restaurant_id = %s', (currID,))
         print("Error here? 3")
         rows = db.cursor.fetchall()
         
