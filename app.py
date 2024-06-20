@@ -1,11 +1,10 @@
 import MySQLdb
 from flask import Flask, render_template, request, jsonify, redirect, url_for
-import MySQLdb.cursors
 
 app = Flask(__name__)
 
 currentID = 0
-rootpswd = ''   #ENTER ROOT PASS HERE
+rootpswd = '0179849Aa$'   #ENTER ROOT PASS HERE
 
 # Database connection parameters
 class mySQLClass:
@@ -38,10 +37,10 @@ class mySQLClass:
 db = mySQLClass("localhost", "root", rootpswd)
 db.connect()
 
-
 @app.route('/')
 def home():
     return render_template('startingPage.html')
+
 
 @app.route('/signin', methods=['POST', 'GET'])
 def signin():
@@ -65,17 +64,16 @@ def signin():
 
             if result:
                 "Shows the grants for each user"
-                show_grants_query = "SHOW GRANTS FOR %s@'localhost'"
+                show_grants_query = "SHOW GRANTS FOR %s@'localhost' USING 'customer_user';"
                 db.cursor.execute(show_grants_query, (user,))
                 privileges = db.cursor.fetchall()
 
                 for privilege in privileges:
                     print(privilege)
                     "manually input the privileges  "
-
+                
                 #TESTING HERE
-                db.cursor.execute("SELECT type FROM login WHERE name = %s", (user,))
-                result = db.cursor.fetchone()
+                db.cursor.execute("GRANT 'customer_user' TO %s@'localhost';", (user,))
 
                 if result[0] == "User":
                     db.cursor.execute("GRANT 'customer_user' TO %s@'localhost';", (user,))
@@ -97,21 +95,18 @@ def signin():
                     print("Unknown user type")
                 db.cursor.execute("FLUSH PRIVILEGES;")
                 "Connects the login user to the database"
-                print("Login successful 0")
-                db.close()
-                db.change(user, passWrd)
-                db.connect()
-
-                print("Login successful 1")
-
+                #newDb.close()
                 return render_template('mainpage.html')
+
+
             else:
                 print("Invalid username or password")
                 return render_template('startingPage.html')
 
+
         except MySQLdb.Error as e:
             print(f"An error occurred: {e}")
-            return render_template('signin.html')
+            return render_template('singin.html')
 
     elif (request.method == 'GET'):
         return render_template('signin.html')
@@ -151,12 +146,13 @@ def signup():
                 if accType == "User":
                     db.cursor.execute(grant_user_query, (newUser,))
                     db.cursor.execute("FLUSH PRIVILEGES;")
-                    db.cursor.execute("SET ROLE 'customer_user'")
+                    db.cursor.execute("SET ROLE customer_user")
 
                 else:
                     db.cursor.execute(grant_restaurant_query, (newUser,))
                     db.cursor.execute("FLUSH PRIVILEGES;")
-                    db.cursor.execute("SET ROLE 'restaurant_user'")
+                    db.cursor.execute("SET ROLE restaurant_user")
+                    
 
             # Add the new user to the database session
 
@@ -178,60 +174,23 @@ def signup():
 def mainpage():
     return render_template('mainpage.html')
 
-
 @app.route('/loadNext')
 def loadNext():
-    global currentID
-    default = ['Not available', '', '', '']
-    valid = False
-    userID = 1
-
-    db.cursor.execute("SELECT MAX(id) FROM restaurants")
-    maxID = db.cursor.fetchone()[0]
-    print(f'The largest ID was {maxID}')
-    i = 0
-    try:
-        while not valid and i < 50:
-                if currentID <= maxID:  
-                    print(f'i = {i}')
-                    i += 1
-                    print(f'\nCurrentID = {currentID}\n')
-                    
-                    db.cursor.execute("""SELECT name, cuisine_type, estabImg, restaurants.id FROM restaurants  LEFT JOIN liked_restaurants lr ON restaurants.id = lr.restaurant_id AND lr.user_id = %s WHERE restaurants.id = %s AND lr.restaurant_id IS NULL """, (userID, currentID))
-                    
-                    restaurant = db.cursor.fetchone()
-                    currentID += 1
-
-                    if restaurant is not None:
-                        valid = True
-
-                        for r in restaurant:
-                            print(r)
-                else:
-                    currentID = 0
-
-        restjson = {'name': restaurant[0],
-                'cuisine_type': restaurant[1],
-                'estabImg' : restaurant[2],
-                'id' : restaurant[3]
+    #select statement
+    global currentID; currentID += 1
+    testjson = {"picture" : "https://www.connarchitects.com/wp-content/uploads/2019/09/CONN_Edison-2.jpg",
+                "name" : "Dummy Restaurant",
+                "description" : "This is a json created to test my restaurant.fdhfkjsdhfjdshfkhdskfhkjfsdhjdfhksfhjkhsfkdhfds",
                 }
-    except Exception as e:
-            print(e)
-            restjson = {'name': default[0],
-                        'cuisine_type': default[1],
-                        'estabImg' : default[2],
-                        'id' : default[3]
-                        }
-    
-    return jsonify(restjson)
+    return jsonify(testjson)
 
-@app.route('/addClicked', methods = ['POST','GET'])
+@app.route('/addClicked', methods=['POST'])
 def addLiked():
     if request.method == 'POST':
         try:
-            user_id = 2  # Replace with the actual user ID from session or request
-            restaurant_id = request.json.get('id')
-            
+            user_id = request.json.get('user_id')
+            restaurant_id = request.json.get('restaurant_id')
+
             if not restaurant_id:
                 return "Failed to get restaurant ID"
 
@@ -242,16 +201,18 @@ def addLiked():
                 VALUES (%s, %s)
             """
             db.cursor.execute(query, (user_id, restaurant_id))
-            
             db.commit()
 
+            return "Successfully added Restaurant"
         except MySQLdb.Error as e:
             db.rollback()
-            return 'operation unsuccessful'
-        return 'operation succeeded'
+            return "Unsuccessful insert operation"
+        
+@app.route('/likedrestaurants')
+def liked():
+    return render_template('likedrestaurants.html')
 
-
-@app.route('/userMenuView', methods=['POST', 'GET'])
+@app.route('/userMenuView', methods = ['POST', 'GET'])
 def showMenu():
 
     try:
@@ -302,8 +263,10 @@ def addfooditem():
 
         try:
             # Insert food item into menu_items table
-            db.cursor.execute("INSERT INTO menu_items (restaurant_id, name, foodurl, description, price)VALUES (%s, %s, %s, %s, %s)", 
-                           (restaurant_id, food_name, food_url, food_description, food_price))
+            db.cursor.execute("""
+                INSERT INTO menu_items (restaurant_id, name, foodurl, description, price)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (restaurant_id, food_name, food_url, food_description, food_price))
             db.commit()
             print("Food item added successfully")
             return redirect(url_for('editrestaurant'))
@@ -401,6 +364,9 @@ def editrestaurant():
 @app.route('/edituser', methods=['GET', 'POST'])
 def edit_user():
     if request.method == 'POST':
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
         first_name = request.form['first_name']
         last_name = request.form['last_name']
         phone_number = request.form['phone_number']
@@ -409,16 +375,26 @@ def edit_user():
         postal_code = request.form['postal_code']
         country = request.form['country']
 
-        login_id = ""
-
         db.cursor.execute("""
-            UPDATE customer
-            SET first_name=%s, last_name=%s, phone_number=%s, city=%s, state=%s, postal_code=%s, country=%s
-            WHERE login_id=%s
-        """, (first_name, last_name, phone_number, city, state, postal_code, country, login_id))
+            INSERT INTO customer (username, email, password, first_name, last_name, phone_number, city, state, postal_code, country)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+                email=VALUES(email),
+                password=VALUES(password),
+                first_name=VALUES(first_name),
+                last_name=VALUES(last_name),
+                phone_number=VALUES(phone_number),
+                city=VALUES(city),
+                state=VALUES(state),
+                postal_code=VALUES(postal_code),
+                country=VALUES(country);
+        """, (username, email, password, first_name, last_name, phone_number, city, state, postal_code, country))
         
         db.commit()
-        return redirect(url_for('mainpage'))  
+        return redirect(url_for('index'))
+    
+    return render_template('edituser.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
