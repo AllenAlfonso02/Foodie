@@ -184,7 +184,9 @@ def loadNext():
     global currentID
     default = ['Not available', '', '', '']
     valid = False
-    userID = currentuserID()
+    login_user_id = currentuserID()
+    db.cursor.execute('SELECT id FROM customer WHERE login_id=%s', (login_user_id,))
+    userID = db.cursor.fetchone()
 
     db.cursor.execute("SELECT MAX(id) FROM restaurants")
     maxID = db.cursor.fetchone()[0]
@@ -195,7 +197,7 @@ def loadNext():
                     #print(f'i = {i}')
                     #print(f'\nCurrentID = {currentID}\n')
                     
-                    db.cursor.execute("""SELECT name, cuisine_type, estabImg, restaurants.id FROM restaurants  LEFT JOIN liked_restaurants lr ON restaurants.id = lr.restaurant_id AND lr.user_id = %s WHERE restaurants.id = %s AND lr.restaurant_id IS NULL """, (userID, currentID))
+                    db.cursor.execute("""SELECT name, cuisine_type, estabImg, restaurants.id FROM restaurants LEFT JOIN liked_restaurants lr ON restaurants.id = lr.restaurant_id AND lr.user_id = %s WHERE restaurants.id = %s AND lr.restaurant_id IS NULL """, (userID, currentID))
                     
                     restaurant = db.cursor.fetchone()
                     currentID += 1
@@ -225,7 +227,9 @@ def loadNext():
 def addLiked():
     if request.method == 'POST':
         try:
-            user_id = currentuserID()
+            login_user_id = currentuserID()
+            db.cursor.execute('SELECT id FROM customer WHERE login_id=%s', (login_user_id,))
+            user_id = db.cursor.fetchone()
             restaurant_id = request.json.get('id')
             
             if not restaurant_id:
