@@ -391,12 +391,12 @@ def editrestaurant():
                 print("Restaurant details updated successfully")
                 return redirect(url_for('editrestaurant'))
             else:
-                return render_template('editrestaurant.html', error="Restaurant not found.")
+                return redirect(url_for('editrestaurant'))
             
         except MySQLdb.Error as e:
             db.rollback()
             print(f"An error occurred: {e}")
-            return render_template('editrestaurant.html', error="Failed to update restaurant details.")
+            return redirect(url_for('editrestaurant'))
             
 @app.route('/edituser', methods=['GET', 'POST'])
 def edit_user():

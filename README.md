@@ -34,8 +34,8 @@ password in `setup.py` , `app.py` , `populate.py`
 ## Separation of work
 
 Alex: Add Food Item and Edit Restaurant (Front-end & Back-end).
-Allen: User Menu Page, SignIn, Signup, and Starting Page (Front-end & Back-end) and Roles
+Allen: User Menu Page, Signin, Signup, and Starting Page (Front-end & Back-end) and Roles
 Julie: Mainuser page (Front-end & Back-end) and populate.py. 
-Kester: Database and Roles (Back-end)
+Kester: Database, Roles, and Signin, Signup(Back-end)
 Nathan: Database and userSettings page (Front-end & Back-end)
 Wesley: likedRestaurant page (Front-end & Back-end)

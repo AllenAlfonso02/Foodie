@@ -1,0 +1,22 @@
+Distribution plan - Foodie
+        Once we have successfully created a fully working application on a virtual machine, we 
+        will then convert our application to run on a container. We have chosen Docker as our 
+        platform that will containerize our application. It is the most used containerization platform 
+        available and is much simpler to use than some other platforms. Some other platforms are more geared 
+        towards deploying large applications but because we are still in the early stages we do not need that 
+        added complexity, and if we did Docker has the capability to deploy any size apps.  Additionally, Docker
+        is not only good for deploying our application but can also be useful during development. Its IDE is well
+        known for being quick with both building and deployment, making the development process simple. We ideally 
+        will have our application fully working when deploying it to Docker, but there are many additional features 
+        we can add to our app that would improve its performance and make sure it is user friendly in all aspects. 
+        We have also had some problems with our program working differently in different running environments and 
+        Docker would prevent this, allowing us to focus our energy on growing our application rather than honing 
+        in on bugs that are not universal.
+        To deploy our application using Docker, we would first need to create a Dockerfile that would include all 
+        the code, libraries, etc. that are needed for the application. Running the file would create an image that 
+        would be able to run our application. If we need to make any changes from our initial image, we would add 
+        layers on top of it containing the changes. 
+        Lastly, to deploy this on the cloud, we would need to use a cloud service.  The chosen cloud service would 
+        likely be AWS as it is beginner friendly and offers lessons that can demonstrate how to deploy our Dockerfile 
+        to the internet. It is also one of the most consistent cloud services out there, being used by the government 
+        for various secure services due to this consistency.
