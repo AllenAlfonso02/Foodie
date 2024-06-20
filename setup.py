@@ -8,7 +8,6 @@ password = "[EveryGoodHorseEats99Carrots]"
 db = MySQLdb.connect(host=host, user=user, passwd=password)
 cursor = db.cursor()
 
-# cursor.execute("DROP DATABASE Foodie;")
 # cursor.execute("GRANT ALL ON foodie.* TO 'root'@'localhost';")
 
 # Create a new database
@@ -35,11 +34,11 @@ cursor.execute("""
         user_id INT NOT NULL,
         name VARCHAR(255) NOT NULL,
         estabImg VARCHAR(255), 
-        address VARCHAR(255) NOT NULL,
-        city VARCHAR(100) NOT NULL,
-        state VARCHAR(100) NOT NULL,
+        address VARCHAR(255),
+        city VARCHAR(100),
+        state VARCHAR(100),
         postal_code VARCHAR(20),
-        country VARCHAR(100) NOT NULL,
+        country VARCHAR(100),
         phone_number VARCHAR(20),
         website VARCHAR(255),
         cuisine_type VARCHAR(100),
