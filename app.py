@@ -7,7 +7,7 @@ import bcrypt
 app = Flask(__name__)
 
 currentID = 0
-rootpswd = 'septons'   #ENTER ROOT PASS HERE
+rootpswd = "septons"   #ENTER ROOT PASS HERE
 
 # Database connection parameters
 class mySQLClass:
