@@ -3,13 +3,13 @@ import MySQLdb
 # Database connection parameters
 host = "localhost"
 user = "root"
-password = ""
+password = "septons"
 
 db = MySQLdb.connect(host=host, user=user, passwd=password)
 cursor = db.cursor()
 
 # cursor.execute("GRANT ALL ON foodie.* TO 'root'@'localhost';")
-
+# cursor.execute("DROP DATABASE Foodie")
 # Create a new database
 cursor.execute("CREATE DATABASE IF NOT EXISTS Foodie;")
 print("Database 'Foodie' created successfully.")
@@ -98,6 +98,8 @@ cursor.execute("CREATE ROLE IF NOT EXISTS 'restaurant_user';")
 roles_command = [
     "GRANT SELECT ON Foodie.restaurants TO 'customer_user';",
     "GRANT SELECT ON Foodie.menu_items TO 'customer_user';",
+    "GRANT SELECT ON Foodie.login TO 'customer_user';",
+    "GRANT SELECT, INSERT, UPDATE, DELETE ON Foodie.liked_restaurants TO 'customer_user';",
     "GRANT SELECT, INSERT, UPDATE ON Foodie.customer TO 'customer_user';",
     "GRANT SELECT, INSERT, UPDATE, DELETE ON Foodie.restaurants TO 'restaurant_user';",
     "GRANT SELECT, INSERT, UPDATE, DELETE ON Foodie.menu_items TO 'restaurant_user';",
