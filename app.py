@@ -1,11 +1,14 @@
 import MySQLdb
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 import MySQLdb.cursors
+import bcrypt
+
+
 
 app = Flask(__name__)
 
 currentID = 0
-rootpswd = ''   #ENTER ROOT PASS HERE
+rootpswd = 'septons'   #ENTER ROOT PASS HERE
 
 # Database connection parameters
 class mySQLClass:
@@ -59,52 +62,59 @@ def signin():
 
         try:
 
-            db.cursor.execute("SELECT * FROM login WHERE EXISTS (SELECT * FROM login WHERE name = %s AND password = %s)",
-                           (user, passWrd))
+
+
+            db.cursor.execute("SELECT password FROM login WHERE name = %s", (user,))
+
             result = db.cursor.fetchone()
 
             if result:
-                "Shows the grants for each user"
-                show_grants_query = "SHOW GRANTS FOR %s@'localhost'"
-                db.cursor.execute(show_grants_query, (user,))
-                privileges = db.cursor.fetchall()
+                stored_hashed_password = result[0]
+                if bcrypt.checkpw(passWrd.encode('utf-8'), stored_hashed_password.encode('utf-8')):
+                    "Shows the grants for each user"
+                    show_grants_query = "SHOW GRANTS FOR %s@'localhost'"
+                    db.cursor.execute(show_grants_query, (user,))
+                    privileges = db.cursor.fetchall()
 
-                for privilege in privileges:
-                    print(privilege)
-                    "manually input the privileges  "
+                    for privilege in privileges:
+                        print(privilege)
+                        "manually input the privileges  "
 
-                #TESTING HERE
-                db.cursor.execute("SELECT type FROM login WHERE name = %s", (user,))
-                result = db.cursor.fetchone()
+                    #TESTING HERE
+                    db.cursor.execute("SELECT type FROM login WHERE name = %s", (user,))
+                    result = db.cursor.fetchone()
 
-                if result[0] == "User":
-                    db.cursor.execute("GRANT 'customer_user' TO %s@'localhost';", (user,))
-                    print("Grants granted for user")
-                elif result[0] == "Establishment":
-                    db.cursor.execute("GRANT 'restaurant_user' TO %s@'localhost';", (user,))
-                    print("Grants granted for establishment")
-                    db.cursor.execute("SELECT id FROM login WHERE name = %s", (user, ))
-                    pop = db.cursor.fetchone()
-                    db.cursor.execute("INSERT INTO restaurants (user_id, name) VALUES (%s, %s)", (pop, user))
-                    #never happens because no commit, commit crashes the program?
-                    db.cursor.execute("SELECT * FROM restaurants WHERE user_id = %s", (pop,))
-                    restaurant = db.cursor.fetchone()
+                    if result[0] == "User":
+                        db.cursor.execute("GRANT 'customer_user' TO %s@'localhost';", (user,))
+                        print("Grants granted for user")
+                    elif result[0] == "Establishment":
+                        db.cursor.execute("GRANT 'restaurant_user' TO %s@'localhost';", (user,))
+                        print("Grants granted for establishment")
+                        db.cursor.execute("SELECT id FROM login WHERE name = %s", (user, ))
+                        pop = db.cursor.fetchone()
+                        db.cursor.execute("INSERT INTO restaurants (user_id, name) VALUES (%s, %s)", (pop, user))
+                        #never happens because no commit, commit crashes the program?
+                        db.cursor.execute("SELECT * FROM restaurants WHERE user_id = %s", (pop,))
+                        restaurant = db.cursor.fetchone()
+                        db.close()
+                        db.change(user, stored_hashed_password)
+                        db.connect()
+                        return redirect(url_for('editrestaurant'))
+                    else:
+                        print("Unknown user type")
+                    db.cursor.execute("FLUSH PRIVILEGES;")
+                    "Connects the login user to the database"
+                    print("Login successful 0")
                     db.close()
-                    db.change(user, passWrd)
+                    db.change(user, stored_hashed_password )
                     db.connect()
-                    return redirect(url_for('editrestaurant'))
+
+                    print("Login successful 1")
+
+                    return render_template('mainpage.html')
                 else:
-                    print("Unknown user type")
-                db.cursor.execute("FLUSH PRIVILEGES;")
-                "Connects the login user to the database"
-                print("Login successful 0")
-                db.close()
-                db.change(user, passWrd)
-                db.connect()
-
-                print("Login successful 1")
-
-                return render_template('mainpage.html')
+                    print("Incorrect password")
+                    return render_template('signin.html', error="Incorrect password")
             else:
                 print("Invalid username or password")
                 return render_template('startingPage.html')
@@ -139,14 +149,15 @@ def signup():
                 print("Username already exists")
                 return render_template('signup.html')
             else:
+                hashed_password = bcrypt.hashpw(passWrd.encode('utf-8'), bcrypt.gensalt())
                 create_user_query = "CREATE USER IF NOT EXISTS %s@'localhost' IDENTIFIED BY %s;"
-                db.cursor.execute(create_user_query, (newUser, passWrd))
+                db.cursor.execute(create_user_query, (newUser,  hashed_password))
                 grant_user_query = "GRANT 'customer_user' TO %s@'localhost';"
                 db.cursor.execute("FLUSH PRIVILEGES;")
                 grant_restaurant_query = "GRANT 'restaurant_user' TO %s@'localhost';"
 
                 db.cursor.execute("INSERT INTO login (name, password, type) VALUES (%s, %s, %s)",
-                               (newUser, passWrd, accType))
+                               (newUser,  hashed_password, accType))
 
                 if accType == "User":
                     db.cursor.execute(grant_user_query, (newUser,))
