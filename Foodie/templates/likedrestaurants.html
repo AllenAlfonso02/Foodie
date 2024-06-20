@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Liked Restaurants</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        .restaurant {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        .restaurant img {
+            border-radius: 8px;
+            width: auto;
+            height: auto;
+            max-width: 600px;
+            max-height: 400px;
+            margin-bottom: 20px;
+        }
+        .restaurant h2 {
+            margin: 10px 0;
+        }
+        .restaurant p {
+            margin: 10px 0;
+        }
+        .back-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border-radius: 4px;
+            text-align: center;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+        .no-restaurants {
+            text-align: center;
+            margin: 20px 0;
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Liked Restaurants</h1>
+
+        <div id="liked-restaurants-container">
+            {% if liked_restaurants %}
+                {% for restaurant in liked_restaurants %}
+                    <div class="restaurant">
+                        <img src="{{ restaurant.estabImg or '/static/images/No-Image-Placeholder.svg.png' }}" alt="{{ restaurant.name }}">
+                        <h2>{{ restaurant.name }}</h2>
+                        <p>{{ restaurant.description or 'No description available' }}</p>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-restaurants">You haven't liked any restaurants yet.</div>
+            {% endif %}
+        </div>
+
+        <a href="/mainpage" class="back-button">Back to Main Page</a>
+    </div>
+
+</body>
+
+</html>
