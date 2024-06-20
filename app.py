@@ -4,7 +4,6 @@ import MySQLdb.cursors
 import bcrypt
 
 
-
 app = Flask(__name__)
 
 currentID = 0
