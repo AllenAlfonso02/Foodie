@@ -184,7 +184,9 @@ def loadNext():
     global currentID
     default = ['Not available', '', '', '']
     valid = False
-    userID = currentuserID()
+    login_user_id = currentuserID()
+    db.cursor.execute('SELECT id FROM customer WHERE login_id=%s', (login_user_id,))
+    userID = db.cursor.fetchone()
 
     db.cursor.execute("SELECT MAX(id) FROM restaurants")
     maxID = db.cursor.fetchone()[0]
@@ -225,7 +227,9 @@ def loadNext():
 def addLiked():
     if request.method == 'POST':
         try:
-            user_id = currentuserID()
+            login_user_id = currentuserID()
+            db.cursor.execute('SELECT id FROM customer WHERE login_id=%s', (login_user_id,))
+            user_id = db.cursor.fetchone()
             restaurant_id = request.json.get('id')
             
             if not restaurant_id:
@@ -373,6 +377,13 @@ def editrestaurant():
 @app.route('/edituser', methods=['GET', 'POST'])
 def edit_user():
     if request.method == 'POST':
+        db.cursor.execute("SELECT CURRENT_USER()")
+        result = db.cursor.fetchone()
+        username = result[0].split('@')[0]
+
+        db.cursor.execute("SELECT id FROM login WHERE name = %s", (username,))
+        login_id = db.cursor.fetchone()[0]
+
         first_name = request.form['first_name']
         last_name = request.form['last_name']
         phone_number = request.form['phone_number']
@@ -381,16 +392,22 @@ def edit_user():
         postal_code = request.form['postal_code']
         country = request.form['country']
 
-        login_id = ""
+        db.cursor.execute("SELECT * FROM customer WHERE login_id = %s", (login_id,))
+        if db.cursor.fetchone():
+            db.cursor.execute("""
+                UPDATE customer
+                SET first_name=%s, last_name=%s, phone_number=%s, city=%s, state=%s, postal_code=%s, country=%s
+                WHERE login_id=%s
+            """, (first_name, last_name, phone_number, city, state, postal_code, country, login_id))
+        else:
+            db.cursor.execute("""
+                INSERT INTO customer (login_id, first_name, last_name, phone_number, city, state, postal_code, country)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, (login_id, first_name, last_name, phone_number, city, state, postal_code, country))
 
-        db.cursor.execute("""
-            UPDATE customer
-            SET first_name=%s, last_name=%s, phone_number=%s, city=%s, state=%s, postal_code=%s, country=%s
-            WHERE login_id=%s
-        """, (first_name, last_name, phone_number, city, state, postal_code, country, login_id))
-        
         db.commit()
-        return redirect(url_for('mainpage'))  
+        return render_template('edituser.html', message="User details successfully updated")
+    return render_template('edituser.html')
 
 def currentuserID():
     
