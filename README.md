@@ -12,11 +12,12 @@ python 3.x or above
 python modules:
 - MySQLdb
 - flask
+- bcrypt
 
 ## Setup
 1. Clone the repo
 2. Install dependencies
-> pip install Flask mysqlclient
+> pip install Flask mysqlclient bcrypt
 3. Enter your mysql root 
 password in `setup.py` , `app.py` , `populate.py`
 4. Run the setup file:
@@ -36,6 +37,6 @@ password in `setup.py` , `app.py` , `populate.py`
 Alex: Add Food Item and Edit Restaurant (Front-end & Back-end).
 Allen: User Menu Page, Signin, Signup, and Starting Page (Front-end & Back-end) and Roles
 Julie: Mainuser page (Front-end & Back-end) and populate.py. 
-Kester: Database, Roles, and Signin, Signup(Back-end)
+Kester: Database, Roles, and Signin, Signup(Front-end & Back-end)
 Nathan: Database and userSettings page (Front-end & Back-end)
 Wesley: likedRestaurant page (Front-end & Back-end)
