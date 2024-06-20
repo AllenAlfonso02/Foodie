@@ -184,18 +184,16 @@ def loadNext():
     global currentID
     default = ['Not available', '', '', '']
     valid = False
-    userID = 1
+    userID = currentuserID()
 
     db.cursor.execute("SELECT MAX(id) FROM restaurants")
     maxID = db.cursor.fetchone()[0]
-    print(f'The largest ID was {maxID}')
-    i = 0
+    
     try:
-        while not valid and i < 50:
+        while not valid:
                 if currentID <= maxID:  
-                    print(f'i = {i}')
-                    i += 1
-                    print(f'\nCurrentID = {currentID}\n')
+                    #print(f'i = {i}')
+                    #print(f'\nCurrentID = {currentID}\n')
                     
                     db.cursor.execute("""SELECT name, cuisine_type, estabImg, restaurants.id FROM restaurants  LEFT JOIN liked_restaurants lr ON restaurants.id = lr.restaurant_id AND lr.user_id = %s WHERE restaurants.id = %s AND lr.restaurant_id IS NULL """, (userID, currentID))
                     
@@ -205,8 +203,6 @@ def loadNext():
                     if restaurant is not None:
                         valid = True
 
-                        for r in restaurant:
-                            print(r)
                 else:
                     currentID = 0
 
@@ -229,7 +225,7 @@ def loadNext():
 def addLiked():
     if request.method == 'POST':
         try:
-            user_id = 2  # Replace with the actual user ID from session or request
+            user_id = currentuserID()
             restaurant_id = request.json.get('id')
             
             if not restaurant_id:
@@ -278,17 +274,7 @@ def showMenu():
 @app.route('/addfooditem', methods=['GET', 'POST'])
 def addfooditem():
     if request.method == 'POST':
-        # Retrieve form data
-        db.cursor.execute("SELECT CURRENT_USER()")
-        result = db.cursor.fetchone()
-        #makes result able to be split
-        results = ''.join(result)
-        #for some reason helped it actually recognize a string?
-        resultss = results
-        # Parse the username (everything before '@')
-        name = resultss.split('@')[0]
-        db.cursor.execute("SELECT id FROM login WHERE name = %s", (name,))
-        I = db.cursor.fetchone()
+        I = currentuserID()
         # Fetch restaurant details from the database
         db.cursor.execute("SELECT id FROM restaurants WHERE user_id = %s", (I,))
         theid = db.cursor.fetchone()
@@ -320,14 +306,7 @@ def addfooditem():
 def editrestaurant():
     if request.method == 'GET':
         try:
-            db.cursor.execute("SELECT CURRENT_USER()")
-            result = db.cursor.fetchone()
-            results = ' '.join(str(item) for item in result)
-            resultss = results
-            # Parse the username (everything before '@')
-            name = resultss.split('@')[0]
-            db.cursor.execute("SELECT id FROM login WHERE name = %s", (name,))
-            I = db.cursor.fetchone()
+            I = currentuserID()
             # Fetch restaurant details from the database
             db.cursor.execute("SELECT user_id FROM restaurants WHERE user_id = %s", (I,))
             restaurant_id = db.cursor.fetchone()
@@ -348,14 +327,7 @@ def editrestaurant():
     elif request.method == 'POST':
         # Similar to GET method, fetch and update restaurant details
         try:
-            db.cursor.execute("SELECT CURRENT_USER()")
-            result = db.cursor.fetchone()
-            results = ''.join(result)
-            resultss = results
-            # Parse the username (everything before '@')
-            name = resultss.split('@')[0]
-            db.cursor.execute("SELECT id FROM login WHERE name = %s", (name,))
-            I = db.cursor.fetchone()
+            I = currentuserID()
             # Fetch restaurant details from the database
             db.cursor.execute("SELECT user_id FROM restaurants WHERE user_id = %s", (I,))
             restaurant_id = db.cursor.fetchone()
@@ -419,6 +391,21 @@ def edit_user():
         
         db.commit()
         return redirect(url_for('mainpage'))  
+
+def currentuserID():
+    
+    # Retrieve form data
+    db.cursor.execute("SELECT CURRENT_USER()")
+    result = db.cursor.fetchone()
+    #makes result able to be split
+    results = ''.join(result)
+    #for some reason helped it actually recognize a string?
+    resultss = results
+    # Parse the username (everything before '@')
+    name = resultss.split('@')[0]
+    db.cursor.execute("SELECT id FROM login WHERE name = %s", (name,))
+    I = db.cursor.fetchone()
+    return I
 
 if __name__ == '__main__':
     app.run(debug=True)
