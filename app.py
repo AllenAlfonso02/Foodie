@@ -84,13 +84,14 @@ def signin():
                     db.cursor.execute("GRANT 'restaurant_user' TO %s@'localhost';", (user,))
                     print("Grants granted for establishment")
                     db.cursor.execute("SELECT id FROM login WHERE name = %s", (user, ))
-                    print('L')
                     pop = db.cursor.fetchone()
                     db.cursor.execute("INSERT INTO restaurants (user_id, name) VALUES (%s, %s)", (pop, user))
-                    print('L')
+                    #never happens because no commit, commit crashes the program?
                     db.cursor.execute("SELECT * FROM restaurants WHERE user_id = %s", (pop,))
-                    print("1")
                     restaurant = db.cursor.fetchone()
+                    db.close()
+                    db.change(user, passWrd)
+                    db.connect()
                     return redirect(url_for('editrestaurant'))
                 else:
                     print("Unknown user type")
@@ -234,7 +235,7 @@ def addLiked():
             if not restaurant_id:
                 return "Failed to get restaurant ID"
 
-            db.execute("INSERT INTO liked_restaurants (user_id, restaurant_id) VALUES (%s, %s)", (user_id, restaurant_id))
+            db.cursor.execute("INSERT INTO liked_restaurants (user_id, restaurant_id) VALUES (%s, %s)", (user_id, restaurant_id))
             
             query = """
                 INSERT INTO liked_restaurants (user_id, restaurant_id)
@@ -252,21 +253,27 @@ def addLiked():
 
 @app.route('/userMenuView', methods=['POST', 'GET'])
 def showMenu():
-    if (request.method == 'GET'):
-        try:
-            db.row_factory = MySQLdb.Row
 
-            currID = ""
+    try:
+        print("Error here? 1")
+        currID = 1
+        print("Error here? 2")
+        db.cursor.execute('SELECT id, name, description, price FROM menu_items WHERE restaurant_id = %s', (currID,))
+        print("Error here? 3")
+        rows = db.cursor.fetchall()
+        
+        for row in rows:
+            for part in row:
+                print(part)
+        
+        print("About to display info!")
+        return render_template('userMenuView.html', rows = rows)
 
-            db.cursor.execute('SELECT * FROM menu_items WHERE restaurant_id = ?', (currID,))
+    except MySQLdb.Error as e:
+        print(f"An error occurred: {e}")
+        return render_template('userMenuView.html')
 
-            rows = db.cursor.fetchall()
 
-        except:
-            return render_template('userMenuView.html')
-
-    else:
-        return render_template('startingPage.html')
 
 @app.route('/addfooditem', methods=['GET', 'POST'])
 def addfooditem():
@@ -274,20 +281,18 @@ def addfooditem():
         # Retrieve form data
         db.cursor.execute("SELECT CURRENT_USER()")
         result = db.cursor.fetchone()
-        print(result)
-        print("please")
+        #makes result able to be split
         results = ''.join(result)
+        #for some reason helped it actually recognize a string?
         resultss = results
         # Parse the username (everything before '@')
         name = resultss.split('@')[0]
-        print(name)
         db.cursor.execute("SELECT id FROM login WHERE name = %s", (name,))
         I = db.cursor.fetchone()
-        print(I[0])
-        #print(I[0])
         # Fetch restaurant details from the database
         db.cursor.execute("SELECT id FROM restaurants WHERE user_id = %s", (I,))
         theid = db.cursor.fetchone()
+        # where i found that restaurants never were created
         print(theid)
         restaurant_id = theid
         food_name = request.form['food-name']
@@ -302,6 +307,7 @@ def addfooditem():
             db.commit()
             print("Food item added successfully")
             return redirect(url_for('editrestaurant'))
+            #throws an error?
             #return render_template('addfooditem.html', message="Food item added successfully")
         except MySQLdb.Error as e:
             #db.rollback()
@@ -354,12 +360,12 @@ def editrestaurant():
             db.cursor.execute("SELECT user_id FROM restaurants WHERE user_id = %s", (I,))
             restaurant_id = db.cursor.fetchone()
 
-            # Assuming 'restaurant_id' is the correct identifier for your restaurant
+            # AAttempts to get the restaurant
             db.cursor.execute("SELECT * FROM restaurants WHERE id = %s", (restaurant_id,))
             restaurant = db.cursor.fetchone()
 
             if restaurant:
-                # Retrieve updated form data
+                # Retrieve new data
                 restaurant_title = request.form['restaurant-title']
                 restaurant_description = request.form['restaurant-description']
                 restaurant_address = request.form['restaurant-address']
@@ -385,12 +391,12 @@ def editrestaurant():
                 print("Restaurant details updated successfully")
                 return redirect(url_for('editrestaurant'))
             else:
-                return render_template('editrestaurant.html', error="Restaurant not found.")
+                return redirect(url_for('editrestaurant'))
             
         except MySQLdb.Error as e:
             db.rollback()
             print(f"An error occurred: {e}")
-            return render_template('editrestaurant.html', error="Failed to update restaurant details.")
+            return redirect(url_for('editrestaurant'))
             
 @app.route('/edituser', methods=['GET', 'POST'])
 def edit_user():
