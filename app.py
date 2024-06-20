@@ -196,11 +196,10 @@ def loadNext():
                 if currentID <= maxID:  
                     #print(f'i = {i}')
                     #print(f'\nCurrentID = {currentID}\n')
-                    
+                    currentID += 1
                     db.cursor.execute("""SELECT name, cuisine_type, estabImg, restaurants.id FROM restaurants  LEFT JOIN liked_restaurants lr ON restaurants.id = lr.restaurant_id AND lr.user_id = %s WHERE restaurants.id = %s AND lr.restaurant_id IS NULL """, (userID, currentID))
                     
                     restaurant = db.cursor.fetchone()
-                    currentID += 1
 
                     if restaurant is not None:
                         valid = True

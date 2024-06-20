@@ -3,13 +3,13 @@ import MySQLdb
 # Database connection parameters
 host = "localhost"
 user = "root"
-password = "septons"
+password = ""
 
 db = MySQLdb.connect(host=host, user=user, passwd=password)
 cursor = db.cursor()
 
 # cursor.execute("GRANT ALL ON foodie.* TO 'root'@'localhost';")
-# cursor.execute("DROP DATABASE Foodie")
+#cursor.execute("DROP DATABASE Foodie")
 # Create a new database
 cursor.execute("CREATE DATABASE IF NOT EXISTS Foodie;")
 print("Database 'Foodie' created successfully.")
